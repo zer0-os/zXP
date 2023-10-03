@@ -1,2 +1,3 @@
-# zXP-protocol
+# zXP
 zer0 experience protocol
+season0
