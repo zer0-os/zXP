@@ -2,11 +2,18 @@
   "root": true,
   "overrides": [
     {
-      "files": ["src/**/*.ts", "test/**/*.ts", "./*.ts"],
-      "extends": ["@zero-tech/eslint-config-cpt/node-ts/.eslintrc.json"],
+      "files": [
+        "src/**/*.ts",
+        "test/**/*.ts",
+        "./*.ts"
+      ],
+      "extends": [
+        "@zero-tech/eslint-config-cpt/node-ts/.eslintrc.json"
+      ],
       "rules": {
         "no-unused-expressions": "off",
-        "no-console": "off"
+        "no-console": "off",
+        "no-empty-blocks": "off"
         // "@typescript-eslint/no-unused-vars": "off" // For debugging
       }
     }
