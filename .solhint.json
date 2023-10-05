@@ -9,7 +9,7 @@
     "no-inline-assembly": "off",
     "avoid-low-level-calls": "off",
     "state-visibility": "error",
-    "no-empty-blocks": "warn",
+    "no-empty-blocks": "off",
     "no-complex-fallback": "off",
     "reason-string": "off",
     "func-visibility": [
@@ -21,6 +21,9 @@
     "constructor-syntax": "warn",
     "named-parameters-mapping": "error",
     "comprehensive-interface": "error",
-    "max-line-length": ["error", 120]
+    "max-line-length": [
+      "error",
+      120
+    ]
   }
 }

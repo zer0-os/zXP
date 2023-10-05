@@ -1,7 +1,8 @@
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Wrapper.sol";
-import "./interfaces/IStakedERC721.sol";
+import {ERC721, IERC721, ERC721Wrapper} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Wrapper.sol";
+import {IStakedERC721} from "./interfaces/IStakedERC721.sol";
 
 contract StakedERC721 is ERC721Wrapper, IStakedERC721 {
     constructor(
