@@ -23,7 +23,7 @@ describe("ZXP", () => {
 
     });
 
-    it("Cannot be initialized twice", async () => {
-        await expect();
+    it("", async () => {
+        //await expect();
     });
 });
