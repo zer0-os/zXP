@@ -23,11 +23,11 @@ import "solidity-docgen";
 // !!! Uncomment this when using Tenderly DevNet !!!
 tenderly.setup({ automaticVerifications: false });
 
-const config : HardhatUserConfig = {
+const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.18",
+        version: "0.8.19",
         settings: {
           optimizer: {
             enabled: true,

@@ -1,54 +1,29 @@
 import * as hre from "hardhat";
+import { Signer, Contract } from "ethers";
 import { expect } from "chai";
-const { waffle, ethers } = require('hardhat');
-const { deployMockContract, provider } = waffle;
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployZNS } from "./helpers/deployZNS";
-import { hashDomainLabel, hashSubdomainName } from "./helpers/hashing";
-import { ZNSContracts, DeployZNSParams } from "./helpers/types";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("@nomicfoundation/hardhat-chai-matchers");
 
-describe("ZNSRegistry", () => {
+describe("ZXP", () => {
     let deployer: SignerWithAddress;
     let operator: SignerWithAddress;
     let randomUser: SignerWithAddress;
-
-    // An address will be all that's needed to test the Registry
-    let mockResolver: SignerWithAddress;
-    let mockRegistrar: SignerWithAddress;
-
-    let zns: ZNSContracts;
-    let wilderDomainHash: string;
+    let mockErc20: Contract;
 
     beforeEach(async () => {
-        [deployer, operator, randomUser, mockResolver, mockRegistrar] = await hre.ethers.getSigners();
+        [deployer, operator, randomUser] = await hre.ethers.getSigners();
 
 
-        const MyERC20 = require('../artifacts/contracts/MyERC20.sol/MyERC20.json');
-        const mockedMyERC20 = await deployMockContract(deployer, MyERC20.abi);
+        const erc20Contract = await hre.ethers.getContractFactory("MockERC20");
+        const _erc20 = await erc20Contract.deploy('Wilder World', 'WILD');
+        await _erc20.deployed();
+        mockErc20 = _erc20;
 
-        zns = await deployZNS(params);
-
-        wilderDomainHash = hashSubdomainName("wilder");
-
-        await zns.accessController.connect(deployer).grantRole(REGISTRAR_ROLE, mockRegistrar.address);
-
-        await zns.registry.connect(mockRegistrar).createDomainRecord(
-            wilderDomainHash,
-            deployer.address,
-            mockResolver.address
-        );
     });
 
     it("Cannot be initialized twice", async () => {
-        await expect(
-            zns.registry.initialize(
-                zns.accessController.address
-            )
-        ).to.be.revertedWith(
-            INITIALIZED_ERR
-        );
+        await expect();
     });
 });
