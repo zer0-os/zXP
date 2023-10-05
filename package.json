@@ -36,7 +36,7 @@
     "@nomicfoundation/hardhat-toolbox": "2.0.2",
     "@nomiclabs/hardhat-ethers": "2.2.2",
     "@nomiclabs/hardhat-etherscan": "3.0.0",
-    "@openzeppelin/contracts": "4.8.3",
+    "@openzeppelin/contracts": "4.9.0",
     "@openzeppelin/contracts-upgradeable": "4.8.3",
     "@openzeppelin/hardhat-upgrades": "1.26.0",
     "@semantic-release/git": "^10.0.1",
