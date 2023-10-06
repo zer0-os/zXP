@@ -15,9 +15,8 @@ describe("ZXP", () => {
     beforeEach(async () => {
         [deployer, operator, randomUser] = await hre.ethers.getSigners();
 
-
         const erc20Contract = await hre.ethers.getContractFactory("MockERC20");
-        const _erc20 = await erc20Contract.deploy('Wilder World', 'WILD');
+        const _erc20 = await erc20Contract.deploy('zToken', 'WILD');
         await _erc20.deployed();
         mockErc20 = _erc20;
 
