@@ -8,7 +8,7 @@ import {ITop3Award} from "./interfaces/ITop3Award.sol";
 contract RewardVault is ERC721Wrapper {
     IERC20 private awardToken;
     ITop3Award private awarder;
-    uint private numStaked;
+    uint public numStaked;
     mapping(uint tokenId => uint stakedAt) private roundStaked;
 
     constructor(

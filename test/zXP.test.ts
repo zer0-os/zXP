@@ -20,6 +20,9 @@ describe("ZXP", () => {
         await _erc20.deployed();
         mockErc20 = _erc20;
 
+        const _erc20meow = await erc20Contract.deploy('meow', "MEOW");
+        await _erc20.deployed();
+        mockErc20 = _erc20;
     });
 
     it("", async () => {

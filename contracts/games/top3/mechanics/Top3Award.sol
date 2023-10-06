@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {ITop3Award} from "./interfaces/ITop3Award.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IRewardVault} from "../interfaces/IRewardVault.sol";
+import {ITop3Award} from "../interfaces/ITop3Award.sol";
+import {ISeason} from "../interfaces/ISeason.sol";
 
 contract Top3Award is Ownable, ITop3Award {
     IERC20 public awardToken;
     IERC721 public stakedToken;
-    address public awardVault;
+    ISeason public season;
+    address public rewardVault;
     address public official;
-    uint public round;
+    uint public maxRounds;
     uint private roundLength;
     uint private roundFirstAward;
     uint private roundSecondAward;
@@ -20,29 +23,43 @@ contract Top3Award is Ownable, ITop3Award {
     uint private startTime;
     uint public roundsResolved;
     bool private initialized;
-    mapping(uint round => bool isResolved) public roundResolved;
+    mapping(address player => uint winnings) public playerWinnings;
 
     constructor(address _official) {
         Ownable(_official);
     }
 
+    function claimWinnings() external {
+        awardToken.transfer(msg.sender, playerWinnings[msg.sender]);
+    }
+
     function initialize(
         IERC20 erc20AwardToken,
-        address _awardVault,
-        uint _roundLength,
+        ISeason _season,
+        IRewardVault _rewardVault,
+        uint _maxRounds,
         uint _roundFirstAward,
         uint _roundSecondAward,
         uint _roundThirdAward,
         uint _roundStakerAward
-    ) external override {
+    ) external override onlyOwner {
         require(!initialized, "Top3 already initialized");
+        require(!_season.offSeason(), "Currently off season");
+        require(
+            awardToken.balanceOf(address(this)) >=
+                _rewardVault.numStaked() *
+                    _roundStakerAward +
+                    _maxRounds *
+                    (roundFirstAward + roundSecondAward + roundThirdAward),
+            "Insufficient balance"
+        );
         awardToken = erc20AwardToken;
-        awardVault = _awardVault;
-        roundLength = _roundLength;
+        rewardVault = _rewardVault;
+        maxRounds = _maxRounds;
         roundFirstAward = _roundFirstAward;
         roundSecondAward = _roundSecondAward;
         roundThirdAward = _roundThirdAward;
-        roundStakerAward = _roundStakerAward;
+        roundStakerAward = _roundStakerAward / _rewardVault.numStaked();
         startTime = block.timestamp;
     }
 
@@ -51,17 +68,11 @@ contract Top3Award is Ownable, ITop3Award {
         address second,
         address third
     ) external override onlyOwner {
-        require(
-            !roundResolved[(block.timestamp - startTime) / roundLength],
-            "ZXP round already resolved"
-        );
-
-        roundResolved[(block.timestamp - startTime) / roundLength] = true;
         roundsResolved++;
-        awardToken.transfer(first, roundFirstAward);
-        awardToken.transfer(second, roundSecondAward);
-        awardToken.transfer(third, roundThirdAward);
-        awardToken.transfer(awardVault, roundStakerAward);
+        playerWinnings[first] += roundFirstAward;
+        playerWinnings[second] += roundSecondAward;
+        playerWinnings[third] += roundThirdAward;
+        awardToken.transfer(rewardVault, roundStakerAward);
     }
 
     function removeTokens(IERC20 token) external override onlyOwner {
