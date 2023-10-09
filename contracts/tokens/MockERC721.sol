@@ -2,13 +2,10 @@
 
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {IMockERC721} from "./IMockERC721.sol";
 
 /**
  * @dev {ERC721} token, including:
@@ -25,19 +22,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
  * roles, as well as the default admin role, which will let it grant both minter
  * and pauser roles to other accounts.
  */
-contract MockERC721 is
-    Context,
-    AccessControlEnumerable,
-    ERC721Enumerable,
-    ERC721Burnable,
-    ERC721Pausable
-{
-    using Counters for Counters.Counter;
-
+contract MockERC721 is ERC721, AccessControl, IMockERC721 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-
-    Counters.Counter private _tokenIdTracker;
 
     string private _baseTokenURI;
 
@@ -76,11 +63,20 @@ contract MockERC721 is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint id) public virtual {
+    function mint(address to, uint id) public virtual override {
         require(
             hasRole(MINTER_ROLE, _msgSender()),
             "ERC721PresetMinterPauserAutoId: must have minter role to mint"
         );
         _mint(to, id);
+    }
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC721, AccessControl) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 }

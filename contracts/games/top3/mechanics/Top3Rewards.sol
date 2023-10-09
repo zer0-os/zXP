@@ -6,12 +6,10 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IRewardVault} from "../interfaces/IRewardVault.sol";
 import {ITop3Rewards} from "../interfaces/ITop3Rewards.sol";
-import {ITop3Season} from "../interfaces/ITop3Season.sol";
 
 contract Top3Rewards is Ownable, ITop3Rewards {
     IERC20 public rewardToken;
     IERC721 public stakedToken;
-    ITop3Season public seasonManager;
     address public rewardVault;
     address public official;
     uint public maxRounds;
@@ -20,6 +18,7 @@ contract Top3Rewards is Ownable, ITop3Rewards {
     uint private roundSecondAward;
     uint private roundThirdAward;
     uint public roundStakerAward;
+    uint public roundStakerAwardNorm;
     uint private startTime;
     uint public roundsResolved;
     mapping(address player => uint winnings) public playerWinnings;

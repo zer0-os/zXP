@@ -28,13 +28,28 @@ describe("ZXP", () => {
         await _erc721.deployed();
         mockErc721 = _erc721;
 
-        const top3seasonContracts = await hre.ethers.getContractFactory("Top3Season");
+        const top3seasonContracts = await hre.ethers.getContractFactory("Top3Seasons");
         const _top3season = await top3seasonContracts.deploy(official, mockErc721, mockErc20, "StakedNFT", "SNFT");
         await _top3season.deployed();
         top3season = _top3season
     });
     it("Players stake NFTs", async () => {
-        await _beastToken.connect(p2signer)["safeTransferFrom(address,address,uint256)"](player1.address, top3season, 1);
+        let p1 = player1.address;
+        let p2 = player2.address;
+        let p1nft = 1;
+        let p2nft = 2;
+        mockErc721.mint(p1, p1nft);
+        mockErc721.mint(p2, p2nft);
+        await mockErc721.connect(player1)["safeTransferFrom(address,address,uint256)"](p1, top3season, 1);
+        await mockErc721.connect(player2)["safeTransferFrom(address,address,uint256)"](p2, top3season, 2);
+    });
+    it("Transfers reward tokens to season manager", async () => {
+        let maxRounds = 10;
+        let firstReward = 40;
+        let secondReward = 20;
+        let thirdReward = 10;
+        let stakerReward = 30;
+        await top3season.startSeason(maxRounds, firstReward, secondReward, thirdReward, stakerReward);
     });
     it("Starts the season", async () => {
         let maxRounds = 10;

@@ -5,7 +5,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ITop3Season} from "./interfaces/ITop3Season.sol";
+import {ITop3Seasons} from "./interfaces/ITop3Seasons.sol";
 import {Top3Rewards} from "./mechanics/Top3Rewards.sol";
 import {RewardVault} from "./mechanics/RewardVault.sol";
 
@@ -50,7 +50,7 @@ contract Top3Season is Ownable, ITop3Season, IERC721Receiver {
             roundFirstReward,
             roundSecondReward,
             roundThirdReward,
-            roundStakerReward
+            roundStakerReward / vault.numStaked()
         );
         rewardToken.transfer(
             address(rewarder),
