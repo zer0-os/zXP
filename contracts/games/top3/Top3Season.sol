@@ -3,16 +3,18 @@ pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ITop3Season} from "./interfaces/ITop3Season.sol";
 import {Top3Rewards} from "./mechanics/Top3Rewards.sol";
 import {RewardVault} from "./mechanics/RewardVault.sol";
 
-contract Top3Season is Ownable, ISeason {
+contract Top3Season is Ownable, ITop3Season, IERC721Receiver {
     uint public currentSeason;
     bool public offSeason;
     Top3Rewards public rewarder;
     RewardVault public vault;
+    IERC20 public rewardToken;
 
     constructor(
         address official,
@@ -22,17 +24,19 @@ contract Top3Season is Ownable, ISeason {
         string memory symbol
     ) {
         offSeason = true;
+        rewardToken = _rewardToken;
+        rewarder = new Top3Rewards(official);
         vault = new RewardVault(
             underlyingToken,
-            _rewardToken,
-            _rearder,
+            rewardToken,
+            rewarder,
             name,
             symbol
         );
-        rewarder = new Top3Rewards(official);
     }
 
     function startSeason(
+        uint maxRounds,
         uint roundFirstReward,
         uint roundSecondReward,
         uint roundThirdReward,
@@ -50,10 +54,11 @@ contract Top3Season is Ownable, ISeason {
         );
         rewardToken.transfer(
             address(rewarder),
-            vault.numStaked() *
-                roundStakerReward +
-                maxRounds *
-                (roundFirstAward + roundSecondAward + roundThirdAward)
+            maxRounds *
+                (roundFirstReward +
+                    roundSecondReward +
+                    roundThirdReward +
+                    roundStakerReward)
         );
     }
 
@@ -69,5 +74,18 @@ contract Top3Season is Ownable, ISeason {
         require(!offSeason, "ZXP offseason");
         offSeason = true;
         rewarder.removeTokens(owner());
+    }
+
+    function onERC721Received(
+        address,
+        address,
+        uint256 tokenId,
+        bytes calldata
+    ) external override returns (bytes4) {
+        IERC721(msg.sender).safeTransferFrom(
+            address(this),
+            address(vault),
+            tokenId
+        );
     }
 }
