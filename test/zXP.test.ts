@@ -29,6 +29,7 @@ describe("ZXP", () => {
 
         const top3seasonContracts = await hre.ethers.getContractFactory("Top3Seasons");
         const _top3season = await top3seasonContracts.deploy(official.address, mockErc721.address, mockErc20.address, "StakedNFT", "SNFT");
+        console.log(mockErc721.address);
         await _top3season.deployed();
         top3season = _top3season;
     });
@@ -39,8 +40,8 @@ describe("ZXP", () => {
         const p2nft = 2;
         await mockErc721.mint(p1, p1nft);
         await mockErc721.mint(p2, p2nft);
-        await mockErc721.connect(player1)["safeTransferFrom(address,address,uint256)"](p1, top3season.address, p1nft);
-        await mockErc721.connect(player2)["safeTransferFrom(address,address,uint256)"](p2, top3season.address, p2nft);
+        await mockErc721.connect(player1)["safeTransferFrom(address,address,uint256)"](p1, top3season.vaultAddress(), p1nft);
+        await mockErc721.connect(player2)["safeTransferFrom(address,address,uint256)"](p2, top3season.vaultAddress(), p2nft);
     });
     it("Funds reward tokens", async () => {
         mockErc20.connect(deployer)["transfer(address,uint256)"](top3season.address, 10000);

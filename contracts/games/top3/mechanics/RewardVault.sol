@@ -6,8 +6,9 @@ import {ERC721, IERC721, ERC721Wrapper} from "@openzeppelin/contracts/token/ERC7
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ITop3Seasons} from "../interfaces/ITop3Seasons.sol";
 import {ITop3Rewards} from "../interfaces/ITop3Rewards.sol";
+import {IRewardVault} from "../interfaces/IRewardVault.sol";
 
-contract RewardVault is ERC721Wrapper, Ownable {
+contract RewardVault is ERC721Wrapper, Ownable, IRewardVault {
     IERC20 private rewardToken;
     ITop3Rewards private rewarder;
     ITop3Seasons private seasons;
@@ -48,13 +49,13 @@ contract RewardVault is ERC721Wrapper, Ownable {
         );
     }
 
-    function finalizeSeason() external onlyOwner {
+    function finalizeSeason() external override onlyOwner {
         seasonRewards[seasons.currentSeason()] =
             rewardToken.balanceOf(address(this)) /
             numStaked;
     }
 
-    function claimRewards(address to, uint season) external onlyOwner {
+    function claimRewards(address to, uint season) external override onlyOwner {
         rewardToken.transfer(to, seasonRewards[season]);
     }
 }

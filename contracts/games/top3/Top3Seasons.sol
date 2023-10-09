@@ -3,13 +3,12 @@ pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ITop3Seasons} from "./interfaces/ITop3Seasons.sol";
 import {Top3Rewards} from "./mechanics/Top3Rewards.sol";
 import {RewardVault} from "./mechanics/RewardVault.sol";
 
-contract Top3Seasons is Ownable, ITop3Seasons, IERC721Receiver {
+contract Top3Seasons is Ownable, ITop3Seasons {
     uint public currentSeason;
     bool public offSeason;
     Top3Rewards public rewarder;
@@ -23,9 +22,10 @@ contract Top3Seasons is Ownable, ITop3Seasons, IERC721Receiver {
         string memory name,
         string memory symbol
     ) {
+        Ownable(official);
         offSeason = true;
         rewardToken = _rewardToken;
-        rewarder = new Top3Rewards(official);
+        rewarder = new Top3Rewards();
         vault = new RewardVault(
             underlyingToken,
             rewardToken,
@@ -79,11 +79,11 @@ contract Top3Seasons is Ownable, ITop3Seasons, IERC721Receiver {
         rewarder.finalizeSeason();
     }
 
-    function claimRewards() external {
+    function claimRewards() external override {
         vault.claimRewards(msg.sender, currentSeason);
     }
 
-    function onERC721Received(
+    /*function onERC721Received(
         address,
         address,
         uint256 tokenId,
@@ -97,6 +97,10 @@ contract Top3Seasons is Ownable, ITop3Seasons, IERC721Receiver {
             tokenId
         );
         return this.onERC721Received.selector;
+    }*/
+
+    function vaultAddress() external view override returns (address) {
+        return address(vault);
     }
 
     event Deployed(address vault, address rewards);

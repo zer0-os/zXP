@@ -4,13 +4,12 @@ pragma solidity ^0.8.19;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {IRewardVault} from "../interfaces/IRewardVault.sol";
+import {ITop3Seasons} from "../interfaces/ITop3Seasons.sol";
 import {ITop3Rewards} from "../interfaces/ITop3Rewards.sol";
 
 contract Top3Rewards is Ownable, ITop3Rewards {
     IERC20 public rewardToken;
     IERC721 public stakedToken;
-    address public rewardVault;
     uint public maxRounds;
     uint private roundLength;
     uint private roundFirstAward;
@@ -20,9 +19,8 @@ contract Top3Rewards is Ownable, ITop3Rewards {
     uint public roundsResolved;
     mapping(address player => uint winnings) public playerWinnings;
 
-    constructor(address _vault) {
+    constructor() {
         Ownable(msg.sender);
-        rewardVault = _vault;
     }
 
     function claimWinnings() external override {
@@ -53,7 +51,10 @@ contract Top3Rewards is Ownable, ITop3Rewards {
         playerWinnings[first] += roundFirstAward;
         playerWinnings[second] += roundSecondAward;
         playerWinnings[third] += roundThirdAward;
-        rewardToken.transfer(rewardVault, roundStakerAward);
+        rewardToken.transfer(
+            ITop3Seasons(owner()).vaultAddress(),
+            roundStakerAward
+        );
     }
 
     function finalizeSeason() external override onlyOwner {
