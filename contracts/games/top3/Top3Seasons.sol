@@ -9,7 +9,7 @@ import {ITop3Seasons} from "./interfaces/ITop3Seasons.sol";
 import {Top3Rewards} from "./mechanics/Top3Rewards.sol";
 import {RewardVault} from "./mechanics/RewardVault.sol";
 
-contract Top3Season is Ownable, ITop3Season, IERC721Receiver {
+contract Top3Seasons is Ownable, ITop3Seasons, IERC721Receiver {
     uint public currentSeason;
     bool public offSeason;
     Top3Rewards public rewarder;
@@ -29,10 +29,12 @@ contract Top3Season is Ownable, ITop3Season, IERC721Receiver {
         vault = new RewardVault(
             underlyingToken,
             rewardToken,
+            ITop3Seasons(this),
             rewarder,
             name,
             symbol
         );
+        emit Deployed(address(vault), address(rewarder));
     }
 
     function startSeason(
@@ -73,7 +75,12 @@ contract Top3Season is Ownable, ITop3Season, IERC721Receiver {
     function endSeason() external override onlyOwner {
         require(!offSeason, "ZXP offseason");
         offSeason = true;
-        rewarder.removeTokens(owner());
+        vault.finalizeSeason();
+        rewarder.finalizeSeason();
+    }
+
+    function claimRewards() external {
+        vault.claimRewards(msg.sender, currentSeason);
     }
 
     function onERC721Received(
@@ -81,11 +88,16 @@ contract Top3Season is Ownable, ITop3Season, IERC721Receiver {
         address,
         uint256 tokenId,
         bytes calldata
-    ) external override returns (bytes4) {
-        IERC721(msg.sender).safeTransferFrom(
+    ) public virtual override returns (bytes4) {
+        require(offSeason, "ZXP season active");
+        require(address(vault.underlying()) == msg.sender, "wtffffffff");
+        IERC721(vault.underlying()).safeTransferFrom(
             address(this),
             address(vault),
             tokenId
         );
+        return this.onERC721Received.selector;
     }
+
+    event Deployed(address vault, address rewards);
 }

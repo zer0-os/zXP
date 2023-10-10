@@ -20,5 +20,9 @@ interface ITop3Rewards {
         address third
     ) external;
 
-    function removeTokens(IERC20 token, address to) external;
+    function finalizeSeason() external;
+
+    function roundsResolved() external view returns (uint);
+
+    function roundStakerAward() external view returns (uint);
 }

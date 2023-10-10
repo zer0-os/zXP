@@ -11,20 +11,17 @@ contract Top3Rewards is Ownable, ITop3Rewards {
     IERC20 public rewardToken;
     IERC721 public stakedToken;
     address public rewardVault;
-    address public official;
     uint public maxRounds;
     uint private roundLength;
     uint private roundFirstAward;
     uint private roundSecondAward;
     uint private roundThirdAward;
     uint public roundStakerAward;
-    uint public roundStakerAwardNorm;
-    uint private startTime;
     uint public roundsResolved;
     mapping(address player => uint winnings) public playerWinnings;
 
-    constructor(address _official, address _vault) {
-        Ownable(_official);
+    constructor(address _vault) {
+        Ownable(msg.sender);
         rewardVault = _vault;
     }
 
@@ -44,7 +41,6 @@ contract Top3Rewards is Ownable, ITop3Rewards {
         roundSecondAward = _roundSecondReward;
         roundThirdAward = _roundThirdReward;
         roundStakerAward = _roundStakerReward;
-        startTime = block.timestamp;
     }
 
     function submitTop3Results(
@@ -60,10 +56,10 @@ contract Top3Rewards is Ownable, ITop3Rewards {
         rewardToken.transfer(rewardVault, roundStakerAward);
     }
 
-    function removeTokens(
-        IERC20 token,
-        address to
-    ) external override onlyOwner {
-        token.transfer(to, token.balanceOf(address(this)));
+    function finalizeSeason() external override onlyOwner {
+        roundsResolved = 0;
+        if (rewardToken.balanceOf(address(this)) != 0) {
+            rewardToken.transfer(owner(), rewardToken.balanceOf(address(this)));
+        }
     }
 }

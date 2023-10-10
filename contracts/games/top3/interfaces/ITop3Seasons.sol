@@ -8,6 +8,8 @@ interface ITop3Seasons {
 
     function endSeason() external;
 
+    function claimRewards() external;
+
     function currentSeason() external view returns (uint);
 
     function offSeason() external view returns (bool);
