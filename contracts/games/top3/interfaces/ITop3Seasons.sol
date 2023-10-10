@@ -8,11 +8,13 @@ interface ITop3Seasons {
 
     function endSeason() external;
 
-    function claimRewards() external;
+    function claimRewards(uint) external;
 
     function currentSeason() external view returns (uint);
 
     function offSeason() external view returns (bool);
 
     function vaultAddress() external view returns (address);
+
+    function test() external view returns (address);
 }

@@ -58,4 +58,14 @@ contract RewardVault is ERC721Wrapper, Ownable, IRewardVault {
     function claimRewards(address to, uint season) external override onlyOwner {
         rewardToken.transfer(to, seasonRewards[season]);
     }
+
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes memory data
+    ) public virtual override returns (bytes4) {
+        require(seasons.offSeason(), "ZXP season active");
+        return super.onERC721Received(operator, from, tokenId, data);
+    }
 }

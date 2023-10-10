@@ -9,7 +9,7 @@ import {ITop3Rewards} from "../interfaces/ITop3Rewards.sol";
 
 contract Top3Rewards is Ownable, ITop3Rewards {
     IERC20 public rewardToken;
-    IERC721 public stakedToken;
+    ITop3Seasons private seasons;
     uint public maxRounds;
     uint private roundLength;
     uint private roundFirstAward;
@@ -19,8 +19,10 @@ contract Top3Rewards is Ownable, ITop3Rewards {
     uint public roundsResolved;
     mapping(address player => uint winnings) public playerWinnings;
 
-    constructor() {
+    constructor(IERC20 _rewardToken) {
         Ownable(msg.sender);
+        seasons = ITop3Seasons(msg.sender);
+        rewardToken = _rewardToken;
     }
 
     function claimWinnings() external override {
@@ -51,10 +53,11 @@ contract Top3Rewards is Ownable, ITop3Rewards {
         playerWinnings[first] += roundFirstAward;
         playerWinnings[second] += roundSecondAward;
         playerWinnings[third] += roundThirdAward;
-        rewardToken.transfer(
-            ITop3Seasons(owner()).vaultAddress(),
-            roundStakerAward
-        );
+        rewardToken.transfer(seasons.vaultAddress(), roundStakerAward);
+    }
+
+    function test() external view returns (address) {
+        return seasons.vaultAddress();
     }
 
     function finalizeSeason() external override onlyOwner {

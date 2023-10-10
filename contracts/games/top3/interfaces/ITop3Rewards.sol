@@ -25,4 +25,6 @@ interface ITop3Rewards {
     function roundsResolved() external view returns (uint);
 
     function roundStakerAward() external view returns (uint);
+
+    function test() external view returns (address);
 }

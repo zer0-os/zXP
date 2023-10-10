@@ -25,7 +25,7 @@ contract Top3Seasons is Ownable, ITop3Seasons {
         Ownable(official);
         offSeason = true;
         rewardToken = _rewardToken;
-        rewarder = new Top3Rewards();
+        rewarder = new Top3Rewards(rewardToken);
         vault = new RewardVault(
             underlyingToken,
             rewardToken,
@@ -79,25 +79,13 @@ contract Top3Seasons is Ownable, ITop3Seasons {
         rewarder.finalizeSeason();
     }
 
-    function claimRewards() external override {
-        vault.claimRewards(msg.sender, currentSeason);
+    function test() external view override returns (address) {
+        return rewarder.test();
     }
 
-    /*function onERC721Received(
-        address,
-        address,
-        uint256 tokenId,
-        bytes calldata
-    ) public virtual override returns (bytes4) {
-        require(offSeason, "ZXP season active");
-        require(address(vault.underlying()) == msg.sender, "wtffffffff");
-        IERC721(vault.underlying()).safeTransferFrom(
-            address(this),
-            address(vault),
-            tokenId
-        );
-        return this.onERC721Received.selector;
-    }*/
+    function claimRewards(uint season) external override {
+        vault.claimRewards(msg.sender, season);
+    }
 
     function vaultAddress() external view override returns (address) {
         return address(vault);
