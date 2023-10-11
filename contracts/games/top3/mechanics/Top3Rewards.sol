@@ -12,10 +12,11 @@ contract Top3Rewards is Ownable, ITop3Rewards {
     ITop3Seasons private seasons;
     uint public maxRounds;
     uint private roundLength;
-    uint private roundFirstAward;
-    uint private roundSecondAward;
-    uint private roundThirdAward;
-    uint public roundStakerAward;
+    uint private roundFirstReward;
+    uint private roundSecondReward;
+    uint private roundThirdReward;
+    uint public roundStakerReward;
+    uint private totalRoundRewards;
     uint public roundsResolved;
     mapping(address player => uint winnings) public playerWinnings;
 
@@ -25,8 +26,8 @@ contract Top3Rewards is Ownable, ITop3Rewards {
         Ownable(address(seasons));
     }
 
-    function claimWinnings() external override {
-        rewardToken.transfer(msg.sender, playerWinnings[msg.sender]);
+    function claimRewards(address to) external override {
+        rewardToken.transfer(to, playerWinnings[to]);
     }
 
     function startSeason(
@@ -37,10 +38,15 @@ contract Top3Rewards is Ownable, ITop3Rewards {
         uint _roundStakerReward
     ) external override onlyOwner {
         maxRounds = _maxRounds;
-        roundFirstAward = _roundFirstReward;
-        roundSecondAward = _roundSecondReward;
-        roundThirdAward = _roundThirdReward;
-        roundStakerAward = _roundStakerReward;
+        roundFirstReward = _roundFirstReward;
+        roundSecondReward = _roundSecondReward;
+        roundThirdReward = _roundThirdReward;
+        roundStakerReward = _roundStakerReward;
+        totalRoundRewards =
+            roundFirstReward +
+            roundSecondReward +
+            roundThirdReward +
+            roundStakerReward;
     }
 
     function submitTop3Results(
@@ -50,16 +56,19 @@ contract Top3Rewards is Ownable, ITop3Rewards {
     ) external override onlyOwner {
         require(roundsResolved < maxRounds, "Top3 max rounds exceeded");
         roundsResolved++;
-        playerWinnings[first] += roundFirstAward;
-        playerWinnings[second] += roundSecondAward;
-        playerWinnings[third] += roundThirdAward;
-        rewardToken.transfer(seasons.vaultAddress(), roundStakerAward);
+        playerWinnings[first] += roundFirstReward;
+        playerWinnings[second] += roundSecondReward;
+        playerWinnings[third] += roundThirdReward;
+        rewardToken.transfer(seasons.vaultAddress(), roundStakerReward);
     }
 
     function finalizeSeason() external override onlyOwner {
+        uint actualBalance = rewardToken.balanceOf(address(this)) -
+            roundsResolved *
+            totalRoundRewards;
         roundsResolved = 0;
         if (rewardToken.balanceOf(address(this)) != 0) {
-            rewardToken.transfer(owner(), rewardToken.balanceOf(address(this)));
+            rewardToken.transfer(owner(), actualBalance);
         }
     }
 }

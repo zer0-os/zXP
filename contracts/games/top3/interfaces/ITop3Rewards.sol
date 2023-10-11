@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface ITop3Rewards {
-    function claimWinnings() external;
+    function claimRewards(address) external;
 
     function startSeason(
         uint _maxRounds,
@@ -24,5 +24,5 @@ interface ITop3Rewards {
 
     function roundsResolved() external view returns (uint);
 
-    function roundStakerAward() external view returns (uint);
+    function roundStakerReward() external view returns (uint);
 }
