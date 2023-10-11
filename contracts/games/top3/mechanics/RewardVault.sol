@@ -45,7 +45,8 @@ contract RewardVault is ERC721Wrapper, Ownable, IRewardVault {
         super._burn(tokenId);
         rewardToken.transfer(
             ownerOf(tokenId),
-            rewarder.roundStakerAward() * (rewarder.roundsResolved() - stakedAt)
+            rewarder.roundStakerReward() *
+                (rewarder.roundsResolved() - stakedAt)
         );
     }
 
