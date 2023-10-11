@@ -20,9 +20,9 @@ contract Top3Rewards is Ownable, ITop3Rewards {
     mapping(address player => uint winnings) public playerWinnings;
 
     constructor(IERC20 _rewardToken) {
-        Ownable(msg.sender);
         seasons = ITop3Seasons(msg.sender);
         rewardToken = _rewardToken;
+        Ownable(address(seasons));
     }
 
     function claimWinnings() external override {
@@ -54,10 +54,6 @@ contract Top3Rewards is Ownable, ITop3Rewards {
         playerWinnings[second] += roundSecondAward;
         playerWinnings[third] += roundThirdAward;
         rewardToken.transfer(seasons.vaultAddress(), roundStakerAward);
-    }
-
-    function test() external view returns (address) {
-        return seasons.vaultAddress();
     }
 
     function finalizeSeason() external override onlyOwner {

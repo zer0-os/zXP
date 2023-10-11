@@ -15,6 +15,4 @@ interface ITop3Seasons {
     function offSeason() external view returns (bool);
 
     function vaultAddress() external view returns (address);
-
-    function test() external view returns (address);
 }

@@ -1,5 +1,5 @@
 import * as hre from "hardhat";
-import { Contract, Address } from "ethers";
+import { Contract } from "ethers";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 // eslint-disable-next-line @typescript-eslint/no-var-requires

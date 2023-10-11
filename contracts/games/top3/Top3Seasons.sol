@@ -79,12 +79,9 @@ contract Top3Seasons is Ownable, ITop3Seasons {
         rewarder.finalizeSeason();
     }
 
-    function test() external view override returns (address) {
-        return rewarder.test();
-    }
-
     function claimRewards(uint season) external override {
         vault.claimRewards(msg.sender, season);
+        rewarder.claimRewards(msg.sender);
     }
 
     function vaultAddress() external view override returns (address) {
