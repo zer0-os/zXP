@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-contract SeasonManager is ISeasonManager {
+import "./interfaces/";
+
+contract SeasonRegistry is ISeasonRegistry {
     mapping(uint season => mapping(bytes32 name => address mechanic))
         private seasonMechanics;
 
@@ -22,4 +24,8 @@ contract SeasonManager is ISeasonManager {
         //require(addressOf(_contractName, currentSeason + 1) == address(0), "ERR_NAME_TAKEN");
         seasonMechanics[season][name] = mechanicAddress;
     }
+
+    function startSeason() external {}
+
+    function endSeason() external {}
 }

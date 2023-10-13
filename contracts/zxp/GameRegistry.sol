@@ -1,17 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-contract GameRegistry is IGameRegistry {
-    mapping(bytes32 game => address[] objects) gameObjects;
+import {IGameRegistry} from "./interfaces/IGameRegistry.sol";
 
-    ///contract names are limited to 32 bytes UTF8 encoded ASCII strings to optimize gas costs
+contract GameRegistry is IGameRegistry {
+    mapping(bytes32 game => address owner) public gameOwner;
+    mapping(bytes32 game => mapping(bytes32 name => address object))
+        public gameObjects;
+
+    modifier onlyGameOwner(bytes32 game, address owner) {
+        require(owner == gameOwner[game], "ZXP: Not game owner");
+        _;
+    }
+
+    function createGame(bytes32 name, address owner) external {
+        gameOwner[name] = owner;
+    }
+
     function registerObject(
+        bytes32 game,
         bytes32 objectName,
         address objectAddress
-    ) public ownerOnly validAddress(_contractAddress) {
-        require(_contractName.length > 0, "ERR_INVALID_NAME");
-
-        // update the address in the registry
-        gameObjects[objectName][objectAddress] = objectAddress;
+    ) public onlyGameOwner {
+        require(_contractName.length > 0, "ZXP: No name");
+        gameObjects[game][objectName] = objectAddress;
     }
 }

@@ -8,7 +8,7 @@ import {ITop3Seasons} from "./interfaces/ITop3Seasons.sol";
 import {Top3Rewards} from "./mechanics/Top3Rewards.sol";
 import {RewardVault} from "./mechanics/RewardVault.sol";
 
-contract Top3Seasons is Ownable, ITop3Seasons {
+contract Top3Rounds is Ownable, ITop3Seasons {
     uint public currentSeason;
     bool public offSeason;
     Top3Rewards public rewarder;
@@ -70,13 +70,6 @@ contract Top3Seasons is Ownable, ITop3Seasons {
         address third
     ) external override {
         rewarder.submitTop3Results(first, second, third);
-    }
-
-    function endSeason() external override onlyOwner {
-        require(!offSeason, "ZXP offseason");
-        offSeason = true;
-        vault.finalizeSeason();
-        rewarder.finalizeSeason();
     }
 
     function claimRewards(uint season) external override {

@@ -4,11 +4,8 @@ pragma solidity ^0.8.19;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC721, IERC721, ERC721Wrapper} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Wrapper.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ITop3Seasons} from "../interfaces/ITop3Seasons.sol";
-import {ITop3Rewards} from "../interfaces/ITop3Rewards.sol";
-import {IRewardVault} from "../interfaces/IRewardVault.sol";
 
-contract RewardVault is ERC721Wrapper, Ownable, IRewardVault {
+contract GameVault is ERC721Wrapper, Ownable, IRewardVault {
     IERC20 private rewardToken;
     ITop3Rewards private rewarder;
     ITop3Seasons private seasons;
