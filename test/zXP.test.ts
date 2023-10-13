@@ -113,9 +113,9 @@ describe("ZXP", () => {
     });
     it("Submits round 1 results", async () => {
         await top3season.resolveRound(p1, p2, p3);
-        expect(await top3season.connect(player1).playerWinnings() == firstReward);
-        expect(await top3season.connect(player2).playerWinnings() == secondReward);
-        expect(await top3season.connect(player3).playerWinnings() == thirdReward);
+        expect(await mockErc20.balanceOf(p1) == firstReward);
+        expect(await mockErc20.balanceOf(p2) == secondReward);
+        expect(await mockErc20.balanceOf(p3) == thirdReward);
     });
     it("Submits round 2 results", async () => {
         await top3season.resolveRound(p3, p2, p1);
