@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./interfaces/";
+import {ISeasonRegistry} from "./interfaces/ISeasonRegistry.sol";
+import {GameRegistryClient} from "../GameRegistryClient.sol";
 
-contract SeasonRegistry is ISeasonRegistry {
+contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
+    bytes32 internal constant OWNER = "Owner";
+    mapping(uint season => bool started) public seasonStarted;
+    mapping(uint season => bool started) public seasonEnded;
     mapping(uint season => mapping(bytes32 name => address mechanic))
         private seasonMechanics;
 
@@ -18,14 +22,18 @@ contract SeasonRegistry is ISeasonRegistry {
         uint season,
         bytes32 name,
         address mechanicAddress
-    ) public ownerOnly validAddress(_contractAddress) {
+    ) public override only(OWNER) {
         require(_contractName.length > 0, "ERR_INVALID_NAME");
         //Prevent overwrite
         //require(addressOf(_contractName, currentSeason + 1) == address(0), "ERR_NAME_TAKEN");
         seasonMechanics[season][name] = mechanicAddress;
     }
 
-    function startSeason() external {}
+    function startSeason(uint season) external override {
+        seasonStarted[season] = true;
+    }
 
-    function endSeason() external {}
+    function endSeason(uint season) external override {
+        seasonEnded[season] = true;
+    }
 }

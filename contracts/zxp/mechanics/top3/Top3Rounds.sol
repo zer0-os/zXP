@@ -4,9 +4,9 @@ pragma solidity ^0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ITop3Seasons} from "./interfaces/ITop3Seasons.sol";
-import {Top3Rewards} from "./mechanics/Top3Rewards.sol";
-import {RewardVault} from "./mechanics/RewardVault.sol";
+import {ITop3Rounds} from "./interfaces/ITop3Rounds.sol";
+import {Top3Rewards} from "./Top3Rewards.sol";
+import {IGameVault} from "../../game/GameVault.sol";
 
 contract Top3Rounds is Ownable, ITop3Seasons {
     uint public currentSeason;

@@ -9,4 +9,9 @@ interface IGameRegistry {
         bytes32 objectName,
         address objectAddress
     ) external;
+
+    function addressOf(
+        bytes32 game,
+        bytes32 objectName
+    ) external returns (address)
 }

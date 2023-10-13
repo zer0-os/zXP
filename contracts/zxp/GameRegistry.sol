@@ -13,7 +13,7 @@ contract GameRegistry is IGameRegistry {
         _;
     }
 
-    function createGame(bytes32 name, address owner) external {
+    function createGame(bytes32 name, address owner) external override {
         gameOwner[name] = owner;
     }
 
@@ -21,8 +21,15 @@ contract GameRegistry is IGameRegistry {
         bytes32 game,
         bytes32 objectName,
         address objectAddress
-    ) public onlyGameOwner {
-        require(_contractName.length > 0, "ZXP: No name");
+    ) external override onlyGameOwner(game, msg.sender) {
+        require(objectName.length > 0, "ZXP: No name");
         gameObjects[game][objectName] = objectAddress;
+    }
+
+    function addressOf(
+        bytes32 game,
+        bytes32 objectName
+    ) external override returns (address) {
+        return gameObjects[game][objectName];
     }
 }
