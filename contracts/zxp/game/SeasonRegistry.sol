@@ -6,10 +6,12 @@ import {GameRegistryClient} from "../GameRegistryClient.sol";
 
 contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     bytes32 internal constant OWNER = "Owner";
-    mapping(uint season => bool started) public seasonStarted;
-    mapping(uint season => bool started) public seasonEnded;
-    mapping(uint season => mapping(bytes32 name => address mechanic))
-        private seasonMechanics;
+    struct Season {
+        uint number;
+        uint start;
+        uint end;
+        mapping(bytes32 name => address mechanic) mechanics;
+    }
 
     function mechanic(
         uint256 season,

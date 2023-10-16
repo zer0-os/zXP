@@ -4,17 +4,27 @@ pragma solidity ^0.8.19;
 import {IGameRegistry} from "./interfaces/IGameRegistry.sol";
 
 contract GameRegistry is IGameRegistry {
-    mapping(bytes32 game => address owner) public gameOwner;
-    mapping(bytes32 game => mapping(bytes32 name => address object))
-        public gameObjects;
+    struct Game {
+        address owner;
+        string description;
+        mapping(bytes32 objectName => address objectAddress) objects;
+    }
+    mapping(bytes32 gameName => Game game) public games;
 
     modifier onlyGameOwner(bytes32 game, address owner) {
-        require(owner == gameOwner[game], "ZXP: Not game owner");
+        require(owner == games[game].owner, "ZXP: Not game owner");
         _;
     }
 
-    function createGame(bytes32 name, address owner) external override {
-        gameOwner[name] = owner;
+    function createGame(
+        bytes32 name,
+        address owner,
+        string calldata description,
+        address[] objects
+    ) external override {
+        games[name].owner = owner;
+        games[name].description = description;
+        games[name].objects = objects;
     }
 
     function registerObject(
@@ -23,7 +33,7 @@ contract GameRegistry is IGameRegistry {
         address objectAddress
     ) external override onlyGameOwner(game, msg.sender) {
         require(objectName.length > 0, "ZXP: No name");
-        gameObjects[game][objectName] = objectAddress;
+        games[game].gameObjects[objectName] = objectAddress;
     }
 
     function addressOf(
