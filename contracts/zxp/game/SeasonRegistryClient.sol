@@ -8,22 +8,22 @@ import {ISeasonRegistryClient} from "./interfaces/ISeasonRegistryClient.sol";
  * @dev Base contract for Registry clients
  */
 contract SeasonRegistryClient is ISeasonRegistryClient {
-    IGameRegistry public registry; // address of the registry
+    ISeasonRegistry public registry; // address of the registry
 
     /**
      * @dev verifies that the caller is mapped to the given contract name
      *
-     * @param _contractName    contract name
+     * @param name    registrant name
      */
-    modifier only(bytes32 name) {
-        _only(name);
+    modifier only(uint season, bytes32 name) {
+        _only(season, name);
         _;
     }
 
     // error message binary size optimization
-    function _only(bytes32 name, uint season) internal view {
+    function _only(uint season, bytes32 name) internal view {
         require(
-            msg.sender == registry.addressOf(name, season),
+            msg.sender == registry.addressOf(season, name),
             "ZXP: Access denied"
         );
     }
@@ -33,7 +33,7 @@ contract SeasonRegistryClient is ISeasonRegistryClient {
      *
      * @param  _registry   address of a contract-registry contract
      */
-    constructor(IGameRegistry _registry) {
+    constructor(ISeasonRegistry _registry) {
         registry = ISeasonRegistry(_registry);
     }
 }

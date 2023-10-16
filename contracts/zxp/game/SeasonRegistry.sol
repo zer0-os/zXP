@@ -6,36 +6,51 @@ import {GameRegistryClient} from "../GameRegistryClient.sol";
 
 contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     bytes32 internal constant OWNER = "Owner";
+
+    uint public currentSeason;
+
     struct Season {
-        uint number;
+        string description;
         uint start;
         uint end;
-        mapping(bytes32 name => address mechanic) mechanics;
+        mapping(bytes32 name => address mechanicAddress) mechanics;
     }
+    mapping(uint season => Season data) public seasons;
 
-    function mechanic(
+    function addressOf(
         uint256 season,
         bytes32 name
     ) public view override returns (address) {
         return seasonMechanics[season][name];
     }
 
-    function registerMechanic(
+    function registerMechanics(
         uint season,
-        bytes32 name,
-        address mechanicAddress
+        bytes32[] mechanicNames,
+        address[] mechanicAddress
     ) public override only(OWNER) {
-        require(_contractName.length > 0, "ERR_INVALID_NAME");
-        //Prevent overwrite
-        //require(addressOf(_contractName, currentSeason + 1) == address(0), "ERR_NAME_TAKEN");
-        seasonMechanics[season][name] = mechanicAddress;
+        require(seasons[season].start == 0, "ZXP: Season started");
+        require(_contractName.length > 0, "ZXP: Invalid name");
+        for (uint256 i = 0; i < objectNames.length; i++) {
+            games[name].objects[objectNames[i]] = objectAddresses[i];
+        }
+    }
+
+    function initializeNextSeason(
+        string calldata description,
+        bytes32[] mechanicNames,
+        address[] mechanicAddresses
+    ) external override {
+        seasons[currentSeason + 1] = Season(description, 0, 0);
+        currentSeason++;
+        registerMechanics(mechanicNames, mechanicAddresses);
     }
 
     function startSeason(uint season) external override {
-        seasonStarted[season] = true;
+        seasons[season].start = block.timestamp;
     }
 
     function endSeason(uint season) external override {
-        seasonEnded[season] = true;
+        seasons[season].end = block.timestamp;
     }
 }
