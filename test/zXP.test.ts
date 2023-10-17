@@ -20,12 +20,13 @@ describe("ZXP", () => {
     let staker2: SignerWithAddress;
     let mockErc20: Contract;
     let mockErc721: Contract;
-    let top3rounds: Contract;
-    let maxRounds: string;
+    let top3rewards: Contract;
+    let gameRegistry: Contract;
+    let seasonRegistry: Contract;
+    let gameVault: Contract;
     let firstReward: string;
     let secondReward: string;
     let thirdReward: string;
-    let stakerReward: string;
     const s1nft = 1;
     const s2nft = 2;
 
@@ -33,19 +34,34 @@ describe("ZXP", () => {
         [deployer, official, player1, player2, player3, staker1, staker2] = await hre.ethers.getSigners();
 
         const erc20Contracts = await hre.ethers.getContractFactory("MockERC20");
-        const _erc20 = await erc20Contracts.deploy("zToken", "WILD");
-        await _erc20.deployed();
-        mockErc20 = _erc20;
+        const erc20 = await erc20Contracts.deploy("zToken", "WILD");
+        await erc20.deployed();
+        mockErc20 = erc20;
 
         const erc721Contracts = await hre.ethers.getContractFactory("MockERC721");
-        const _erc721 = await erc721Contracts.deploy("zToken", "WILD", "");
-        await _erc721.deployed();
-        mockErc721 = _erc721;
+        const erc721 = await erc721Contracts.deploy("zToken", "WILD", "");
+        await erc721.deployed();
+        mockErc721 = erc721;
+
+        const gameRegFactory = await hre.ethers.getContractFactory("GameRegistry");
+        const gameRegDeploy = await gameRegFactory.deploy(official.address);
+        await gameRegDeploy.deployed();
+        gameRegistry = gameRegDeploy;
+
+        const seasonRegFactory = await hre.ethers.getContractFactory("SeasonRegistry");
+        const seasonRegDeploy = await seasonRegFactory.deploy(official.address);
+        await seasonRegDeploy.deployed();
+        seasonRegistry = seasonRegDeploy;
+
+        const gameVaultFactory = await hre.ethers.getContractFactory("SeasonRegistry");
+        const gameVaultDeploy = await gameVaultFactory.deploy(official.address, mockErc721.address, mockErc20.address, "StakedNFT", "SNFT");
+        await gameVaultDeploy.deployed();
+        gameVault = gameVaultDeploy;
 
         const top3RoundsContracts = await hre.ethers.getContractFactory("Top3Rounds");
-        const _top3Rounds = await top3RoundsContracts.deploy(official.address, mockErc721.address, mockErc20.address, "StakedNFT", "SNFT");
-        await _top3Rounds.deployed();
-        top3rounds = _top3Rounds;
+        const top3deploy = await top3RoundsContracts.deploy(official.address);
+        await top3deploy.deployed();
+        top3rewards = top3deploy;
 
         p1 = player1.address;
         p2 = player2.address;
@@ -57,9 +73,9 @@ describe("ZXP", () => {
         await mockErc721.mint(s1, s1nft
         );
         await mockErc721.mint(s2, s2nft);
-        await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, top3rounds.vaultAddress(), s1nft
+        await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVault.address, s1nft
         );
-        await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, top3rounds.vaultAddress(), s2nft);
+        await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, gameVault.address, s2nft);
     });
     it("Funds reward tokens", async () => {
         await mockErc20.connect(deployer)["transfer(address,uint256)"](top3rounds.address, "1000000000000000000000000");

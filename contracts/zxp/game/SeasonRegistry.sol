@@ -15,19 +15,11 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     }
     mapping(uint season => Season data) public seasons;
 
-    function addressOf(
-        uint256 season,
-        bytes32 name
-    ) public view override returns (address) {
-        return seasonMechanics[season][name];
-    }
-
     function registerMechanics(
         uint season,
         bytes32[] mechanicNames,
         address[] mechanicAddress
-    ) public override {
-        require(registry.isGameOwner(game));
+    ) public override only(OWNER) {
         require(seasons[season].start == 0, "ZXP: Season started");
         require(_contractName.length > 0, "ZXP: Invalid name");
         for (uint256 i = 0; i < mechanicNames.length; i++) {
@@ -39,17 +31,25 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
         string calldata description,
         bytes32[] mechanicNames,
         address[] mechanicAddresses
-    ) external override {
+    ) external override only(OWNER) {
+        require(seasons[currentSeason].end != 0, "ZXP season running");
         seasons[currentSeason + 1] = Season(description, 0, 0);
         currentSeason++;
         registerMechanics(mechanicNames, mechanicAddresses);
     }
 
-    function startSeason(uint season) external override {
+    function startSeason(uint season) external override only(OWNER) {
         seasons[season].start = block.timestamp;
     }
 
-    function endSeason(uint season) external override {
+    function endSeason(uint season) external override only(OWNER) {
         seasons[season].end = block.timestamp;
+    }
+
+    function addressOf(
+        uint256 season,
+        bytes32 name
+    ) public view override returns (address) {
+        return seasons[season].mechanics[name];
     }
 }
