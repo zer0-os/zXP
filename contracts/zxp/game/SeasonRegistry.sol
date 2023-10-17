@@ -27,14 +27,14 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
         }
     }
 
-    function initializeNextSeason(
+    function initializeSeason(
+        uint season,
         string calldata description,
         bytes32[] mechanicNames,
         address[] mechanicAddresses
     ) external override only(OWNER) {
-        require(seasons[currentSeason].end != 0, "ZXP season running");
-        seasons[currentSeason + 1] = Season(description, 0, 0);
-        currentSeason++;
+        require(seasons[season].start == 0, "ZXP season started");
+        seasons[season] = Season(description, 0, 0);
         registerMechanics(mechanicNames, mechanicAddresses);
     }
 
@@ -43,6 +43,7 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     }
 
     function endSeason(uint season) external override only(OWNER) {
+        require(seasons[season].start != 0, "ZXP season not started");
         seasons[season].end = block.timestamp;
     }
 

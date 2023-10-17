@@ -104,7 +104,7 @@ describe("ZXP", () => {
         await top3Rewards.connect(staker2).claimRewards(0);
     });
     it("Funds reward tokens", async () => {
-        await mockErc20.connect(deployer)["transfer(address,uint256)"](top3rewards.address, "1");
+        await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1");
     });
     it("Starts new season", async () => {
         maxRounds = "10";
