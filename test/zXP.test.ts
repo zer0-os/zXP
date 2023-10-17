@@ -20,7 +20,7 @@ describe("ZXP", () => {
     let staker2: SignerWithAddress;
     let mockErc20: Contract;
     let mockErc721: Contract;
-    let top3rewards: Contract;
+    let top3Rewards: Contract;
     let gameRegistry: Contract;
     let seasonRegistry: Contract;
     let gameVault: Contract;
@@ -58,10 +58,10 @@ describe("ZXP", () => {
         await gameVaultDeploy.deployed();
         gameVault = gameVaultDeploy;
 
-        const top3RoundsContracts = await hre.ethers.getContractFactory("Top3Rounds");
-        const top3deploy = await top3RoundsContracts.deploy(official.address);
+        const top3rewardsFactory = await hre.ethers.getContractFactory("top3rewards");
+        const top3deploy = await top3rewardsFactory.deploy(official.address);
         await top3deploy.deployed();
-        top3rewards = top3deploy;
+        top3Rewards = top3deploy;
 
         p1 = player1.address;
         p2 = player2.address;
@@ -70,52 +70,41 @@ describe("ZXP", () => {
         s2 = staker2.address;
     });
     it("Players stake NFTs", async () => {
-        await mockErc721.mint(s1, s1nft
-        );
+        await mockErc721.mint(s1, s1nft);
         await mockErc721.mint(s2, s2nft);
-        await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVault.address, s1nft
-        );
+        await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVault.address, s1nft);
         await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, gameVault.address, s2nft);
     });
     it("Funds reward tokens", async () => {
-        await mockErc20.connect(deployer)["transfer(address,uint256)"](top3rounds.address, "1000000000000000000000000");
+        await mockErc20.connect(deployer)["transfer(address,uint256)"](top3rewards.address, "1000000000000000000000000");
+    });
+    it("Initializes the season", async () => {
+        seasonRegistry.startSeason();
     });
     it("Starts the season", async () => {
-        maxRounds = "10";
-        firstReward = "4000000000000000000";
-        secondReward = "2000000000000000000";
-        thirdReward = "1000000000000000000";
-        stakerReward = "3000000000000000000";
-        let collateralRequired = "100000000000000000000"
-        await mockErc20.connect(deployer)["transfer(address,uint256)"](top3rounds.address, collateralRequired.toString());
-        await top3rounds.startSeason(maxRounds, firstReward, secondReward, thirdReward, stakerReward);
+        seasonRegistry.startSeason();
     });
     it("Submits round 1 results", async () => {
-        await top3rounds.resolveRound(p1, p2, p3);
+        firstReward = "100";
+        secondReward = "10";
+        thirdReward = "1";
+        await top3Rewards.submitTop3Rewards(p1, p2, p3, firstReward, secondReward, thirdReward);
     });
     it("Ends the season", async () => {
-        await top3rounds.endSeason();
+        await seasonRegistry.endSeason();
     });
     it("Player 1 claims season rewards", async () => {
-        await top3rounds.connect(player1).claimRewards(0);
+        await top3Rewards.connect(player1).claimRewards(0);
         expect(await mockErc20.balanceOf(p1) == firstReward);
-        expect(await mockErc20.balanceOf(p2) == secondReward);
-        expect(await mockErc20.balanceOf(p3) == thirdReward);
-    });
-    it("Player 2 claims season rewards", async () => {
-        await top3rounds.connect(player2).claimRewards(0);
-    });
-    it("Player 2 claims season rewards", async () => {
-        await top3rounds.connect(player3).claimRewards(0);
     });
     it("Staker1 claims rewards", async () => {
-        await top3rounds.connect(staker1).claimRewards(0);
+        await top3Rewards.connect(staker1).claimRewards(0);
     });
     it("Staker2 claims rewards", async () => {
-        await top3rounds.connect(staker2).claimRewards(0);
+        await top3Rewards.connect(staker2).claimRewards(0);
     });
     it("Funds reward tokens", async () => {
-        await mockErc20.connect(deployer)["transfer(address,uint256)"](top3rounds.address, "1");
+        await mockErc20.connect(deployer)["transfer(address,uint256)"](top3rewards.address, "1");
     });
     it("Starts new season", async () => {
         maxRounds = "10";
@@ -124,31 +113,31 @@ describe("ZXP", () => {
         thirdReward = "1000000000000000000";
         stakerReward = "3000000000000000000";
         let collateralRequired = "100000000000000000000"
-        await mockErc20.connect(deployer)["transfer(address,uint256)"](top3rounds.address, collateralRequired.toString());
-        await top3rounds.startSeason(maxRounds, firstReward, secondReward, thirdReward, stakerReward);
+        await mockErc20.connect(deployer)["transfer(address,uint256)"](top3rewards.address, collateralRequired.toString());
+        await top3rewards.startSeason(maxRounds, firstReward, secondReward, thirdReward, stakerReward);
     });
     it("Submits round 1 results", async () => {
-        await top3rounds.resolveRound(p1, p2, p3);
+        await top3rewards.resolveRound(p1, p2, p3);
         expect(await mockErc20.balanceOf(p1) == firstReward);
         expect(await mockErc20.balanceOf(p2) == secondReward);
         expect(await mockErc20.balanceOf(p3) == thirdReward);
     });
     it("Submits round 2 results", async () => {
-        await top3rounds.resolveRound(p3, p2, p1);
+        await top3rewards.resolveRound(p3, p2, p1);
     });
     it("Ends the season", async () => {
-        await top3rounds.endSeason();
+        await top3rewards.endSeason();
     });
     it("Player 1 claims season rewards", async () => {
-        await top3rounds.connect(player1).claimRewards(0);
+        await top3rewards.connect(player1).claimRewards(0);
     });
     it("Player 2 claims season rewards", async () => {
-        await top3rounds.connect(player2).claimRewards(0);
+        await top3rewards.connect(player2).claimRewards(0);
     });
     it("Staker1 claims rewards", async () => {
-        await top3rounds.connect(staker1).claimRewards(0);
+        await top3rewards.connect(staker1).claimRewards(0);
     });
     it("Staker2 claims rewards", async () => {
-        await top3rounds.connect(staker2).claimRewards(0);
+        await top3rewards.connect(staker2).claimRewards(0);
     });
 });
