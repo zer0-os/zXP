@@ -9,19 +9,20 @@ import {ISeasonRegistryClient} from "./interfaces/ISeasonRegistryClient.sol";
  */
 contract SeasonRegistryClient is ISeasonRegistryClient {
     ISeasonRegistry public registry; // address of the registry
+    uint public season;
 
     /**
      * @dev verifies that the caller is mapped to the given contract name
      *
      * @param name    registrant name
      */
-    modifier only(uint season, bytes32 name) {
-        _only(season, name);
+    modifier only(bytes32 name) {
+        _only(name);
         _;
     }
 
     // error message binary size optimization
-    function _only(uint season, bytes32 name) internal view {
+    function _only(bytes32 name) internal view {
         require(
             msg.sender == registry.addressOf(season, name),
             "ZXP: Access denied"
