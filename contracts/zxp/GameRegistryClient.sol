@@ -9,15 +9,15 @@ import {IGameRegistryClient} from "./interfaces/IGameRegistryClient.sol";
  */
 contract GameRegistryClient is IGameRegistryClient {
     IGameRegistry public registry; // address of the registry
-    bytes32 public game;
+    bytes32 public game; //name of the game
 
     /**
      * @dev verifies that the caller is mapped to the given contract name
      *
-     * @param game game name
+     * @param object registered object
      */
     modifier only(bytes32 object) {
-        _only(game, object);
+        _only(object);
         _;
     }
 
@@ -35,7 +35,7 @@ contract GameRegistryClient is IGameRegistryClient {
      * @param  gameRegistry   address of a contract-registry contract
      */
     constructor(IGameRegistry gameRegistry, bytes32 gameName) {
-        registry = IGameRegistry(gameRegistry);
+        registry = gameRegistry;
         game = gameName;
     }
 }
