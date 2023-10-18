@@ -15,13 +15,19 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     }
     mapping(uint season => Season data) public seasons;
 
+    modifier seasonStarted(uint season, bool ){
+        require(seasons[season].start == 0, "ZXP: Season started");
+    }
+
+    function _seasonStarted()
+
     function registerMechanics(
         uint season,
         bytes32[] mechanicNames,
         address[] mechanicAddress
     ) public override only(OWNER) {
         require(seasons[season].start == 0, "ZXP: Season started");
-        require(_contractName.length > 0, "ZXP: Invalid name");
+        require(_contractNames.length > 0, "ZXP: Invalid name");
         for (uint256 i = 0; i < mechanicNames.length; i++) {
             seasons[season].mechanics[mechanicNames[i]] = mechanicAddresses[i];
         }
