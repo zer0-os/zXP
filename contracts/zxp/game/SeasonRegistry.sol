@@ -15,11 +15,10 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     }
     mapping(uint season => Season data) public seasons;
 
-    modifier seasonStarted(uint season, bool ){
+    modifier seasonStarted(uint season, bool) {
         require(seasons[season].start == 0, "ZXP: Season started");
+        _;
     }
-
-    function _seasonStarted()
 
     function registerMechanics(
         uint season,
