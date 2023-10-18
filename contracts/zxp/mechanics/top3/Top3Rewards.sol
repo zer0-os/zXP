@@ -10,8 +10,8 @@ contract Top3Rewards is Ownable, ITop3Rewards {
     IERC20 public rewardToken;
     mapping(address winner => uint reward) public winnings;
 
-    constructor(address owner, IERC20 _rewardToken) {
-        rewardToken = _rewardToken;
+    constructor(address owner, IERC20 erc20RewardToken) {
+        rewardToken = erc20RewardToken;
         Ownable(owner);
     }
 

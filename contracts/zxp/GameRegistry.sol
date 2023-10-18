@@ -20,7 +20,9 @@ contract GameRegistry is IGameRegistry {
     ) external override {
         games[name].metadata = metadata;
         games[name].objects[OWNER] = owner;
-        registerObjects(name, objectNames, objectAddresses);
+        if (objectNames.length > 0) {
+            registerObjects(name, objectNames, objectAddresses);
+        }
     }
 
     function registerObjects(

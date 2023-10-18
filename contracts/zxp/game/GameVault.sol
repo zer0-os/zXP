@@ -9,6 +9,8 @@ import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
 
 contract GameVault is ERC721Wrapper, IGameVault, GameRegistryClient {
+    mapping(uint id => uint block) public stakedAt;
+
     constructor(
         IERC721 underlyingToken,
         IERC20 _rewardToken,
@@ -21,4 +23,14 @@ contract GameVault is ERC721Wrapper, IGameVault, GameRegistryClient {
         ERC721(name, symbol)
         ERC721Wrapper(underlyingToken)
     {}
+
+    function _mint(address to, uint id) internal override {
+        stakedAt[id] = block.number;
+        super._mint(to, id);
+    }
+
+    function _burn(uint id) internal override {
+        stakedAt[id] = 0;
+        super._burn(id);
+    }
 }
