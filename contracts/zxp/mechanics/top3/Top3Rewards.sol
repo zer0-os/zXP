@@ -15,7 +15,7 @@ contract Top3Rewards is Ownable, ITop3Rewards {
         Ownable(owner);
     }
 
-    function claimRewards(address to) external override {
+    function claim(address to) external override {
         rewardToken.transfer(to, winnings[to]);
     }
 

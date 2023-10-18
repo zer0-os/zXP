@@ -98,15 +98,9 @@ describe("ZXP", () => {
     });
     it("Ends the season", async () => {
         await seasonRegistry.endSeason();
-    });/*
+    });
     it("Player 1 claims season rewards", async () => {
-        await top3Rewards.connect(player1).claimRewards(0);
+        await top3Rewards.connect(player1).claim(p1);
         expect(await mockErc20.balanceOf(p1) == firstReward);
     });
-    it("Staker1 claims rewards", async () => {
-        await top3Rewards.connect(staker1).claimRewards(0);
-    });
-    it("Staker2 claims rewards", async () => {
-        await top3Rewards.connect(staker2).claimRewards(0);
-    });*/
 });
