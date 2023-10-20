@@ -8,7 +8,7 @@ import {ITop3Rewards} from "./interfaces/ITop3Rewards.sol";
 
 contract Top3Rewards is Ownable, ITop3Rewards {
     IERC20 public rewardToken;
-    mapping(address winner => uint reward) public winnings;
+    mapping(address awardee => uint amount) public rewards;
 
     constructor(address owner, IERC20 erc20RewardToken) {
         rewardToken = erc20RewardToken;
@@ -16,7 +16,7 @@ contract Top3Rewards is Ownable, ITop3Rewards {
     }
 
     function claim(address to) external override {
-        rewardToken.transfer(to, winnings[to]);
+        rewardToken.transfer(to, rewards[to]);
     }
 
     function submitTop3Results(
@@ -27,8 +27,8 @@ contract Top3Rewards is Ownable, ITop3Rewards {
         uint secondReward,
         uint thirdReward
     ) external override onlyOwner {
-        winnings[first] += firstReward;
-        winnings[second] += secondReward;
-        winnings[third] += thirdReward;
+        rewards[first] += firstReward;
+        rewards[second] += secondReward;
+        rewards[third] += thirdReward;
     }
 }

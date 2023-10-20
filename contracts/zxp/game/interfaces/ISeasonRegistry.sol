@@ -8,7 +8,6 @@ interface ISeasonRegistry {
     ) external view returns (address);
 
     function registerMechanics(
-        uint season,
         bytes32[] calldata mechanicNames,
         address[] calldata mechanicAddresses
     ) external;
@@ -16,4 +15,6 @@ interface ISeasonRegistry {
     function startSeason() external;
 
     function endSeason() external;
+
+    function onUnstake(uint id, address to, uint blocks) external;
 }

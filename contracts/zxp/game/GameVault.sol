@@ -7,8 +7,10 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IGameVault} from "./interfaces/IGameVault.sol";
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
+import {ISeasonRegistry} from "./interfaces/ISeasonRegistry.sol";
 
 contract GameVault is ERC721Wrapper, IGameVault, GameRegistryClient {
+    bytes32 internal constant SEASON_REGISTRY = "SeasonRegistry";
     mapping(uint id => uint block) public stakedAt;
 
     constructor(
@@ -30,6 +32,11 @@ contract GameVault is ERC721Wrapper, IGameVault, GameRegistryClient {
     }
 
     function _burn(uint id) internal override {
+        ISeasonRegistry(registry.addressOf(game, SEASON_REGISTRY)).onUnstake(
+            id,
+            msg.sender,
+            block.number - stakedAt[id]
+        );
         stakedAt[id] = 0;
         super._burn(id);
     }

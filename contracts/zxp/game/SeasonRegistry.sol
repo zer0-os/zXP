@@ -4,9 +4,11 @@ pragma solidity ^0.8.19;
 import {ISeasonRegistry} from "./interfaces/ISeasonRegistry.sol";
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
+import {IStakerRewards} from "../mechanics/interfaces/IStakerRewards.sol";
 
 contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     bytes32 internal constant OWNER = "Owner";
+    bytes32 internal constant STAKER_REWARDS = "StakerRewards";
     uint public currentSeason;
     struct Season {
         string metadata;
@@ -27,13 +29,14 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     ) GameRegistryClient(registry, game) {}
 
     function registerMechanics(
-        uint season,
         bytes32[] calldata mechanicNames,
         address[] calldata mechanicAddresses
-    ) public override only(OWNER) preseason(season) {
+    ) public override only(OWNER) preseason(currentSeason) {
         require(mechanicNames.length > 0, "ZXP: Invalid name");
         for (uint256 i = 0; i < mechanicNames.length; i++) {
-            seasons[season].mechanics[mechanicNames[i]] = mechanicAddresses[i];
+            seasons[currentSeason].mechanics[
+                mechanicNames[i]
+            ] = mechanicAddresses[i];
         }
     }
 
@@ -60,5 +63,17 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
         bytes32 name
     ) public view override returns (address) {
         return seasons[season].mechanics[name];
+    }
+
+    function onUnstake(
+        uint id,
+        address to,
+        uint blocksStaked
+    ) external override {
+        IStakerRewards(addressOf(currentSeason, STAKER_REWARDS)).onUnstake(
+            id,
+            to,
+            blocksStaked
+        );
     }
 }

@@ -21,6 +21,7 @@ describe("ZXP", () => {
     let mockErc20: Contract;
     let mockErc721: Contract;
     let top3Rewards: Contract;
+    let stakerRewards: Contract;
     let gameRegistry: Contract;
     let seasonRegistry: Contract;
     let gameVault: Contract;
@@ -65,6 +66,11 @@ describe("ZXP", () => {
         await top3deploy.deployed();
         top3Rewards = top3deploy;
 
+        const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
+        const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10");
+        await stakerRewardsDeploy.deployed();
+        stakerRewards = stakerRewardsDeploy;
+
         p1 = player1.address;
         p2 = player2.address;
         p3 = player3.address;
@@ -75,6 +81,10 @@ describe("ZXP", () => {
     it("Creates game", async () => {
         await gameRegistry.createGame(gameName, deployer.address, "description", [], []);
     });
+    it("Registers SeasonRegistry", async () => {
+        const sr = ethers.utils.formatBytes32String("SeasonRegistry");
+        await gameRegistry.registerObjects(gameName, [sr], [seasonRegistry.address]);
+    });
     it("Players stake NFTs", async () => {
         await mockErc721.mint(s1, s1nft);
         await mockErc721.mint(s2, s2nft);
@@ -83,12 +93,15 @@ describe("ZXP", () => {
     });
     it("Funds reward tokens", async () => {
         await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
+
+        await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
     });
-    it("Initializes the season", async () => {
-        seasonRegistry.startSeason();
+    it("Registers StakerReward mechanic", async () => {
+        const sr = ethers.utils.formatBytes32String("StakerRewards");
+        await seasonRegistry.registerMechanics([sr], [stakerRewards.address]);
     });
     it("Starts the season", async () => {
-        seasonRegistry.startSeason();
+        await seasonRegistry.startSeason();
     });
     it("Submits round 1 results", async () => {
         firstReward = "100";
@@ -102,5 +115,8 @@ describe("ZXP", () => {
     it("Player 1 claims season rewards", async () => {
         await top3Rewards.connect(player1).claim(p1);
         expect(await mockErc20.balanceOf(p1) == firstReward);
+    });
+    it("Staker 1 unstakes and claims rewards", async () => {
+        await gameVault.connect(staker1).withdrawTo(s1, [s1nft]);
     });
 });
