@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 interface IStakerRewards {
-    function claim(address to) external;
+    function claim(uint id) external;
 
     function onUnstake(uint id, address to, uint blocksStaked) external;
 }

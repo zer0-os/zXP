@@ -65,15 +65,11 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
         return seasons[season].mechanics[name];
     }
 
-    function onUnstake(
-        uint id,
-        address to,
-        uint blocksStaked
-    ) external override {
+    function onUnstake(uint id, address to, uint stakedAt) external override {
         IStakerRewards(addressOf(currentSeason, STAKER_REWARDS)).onUnstake(
             id,
             to,
-            blocksStaked
+            stakedAt
         );
     }
 }
