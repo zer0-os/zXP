@@ -136,9 +136,9 @@ describe("ZXP", () => {
         for (let i = 0; i < numRounds; i++) {
             const str = "Submits round " + i.toString() + " results";
             it(str, async () => {
-                firstReward = "100";
-                secondReward = "10";
-                thirdReward = "1";
+                firstReward = "1000000000000000000000";
+                secondReward = "100000000000000000000";
+                thirdReward = "10000000000000000000";
                 await top3Rewards.submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
         }
