@@ -12,4 +12,13 @@ contract XP is ERC20, GameRegistryClient {
         string memory name,
         string memory symbol
     ) GameRegistryClient(registry, game) ERC20(name, symbol) {}
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint amount
+    ) internal virtual override {
+        require(from == address(0) || to == address(0), "Token is soulbound");
+        super._beforeTokenTransfer(from, to, amount);
+    }
 }
