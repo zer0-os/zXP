@@ -8,6 +8,7 @@ import {IGameRegistryClient} from "./interfaces/IGameRegistryClient.sol";
  * @dev Base contract for Registry clients
  */
 contract GameRegistryClient is IGameRegistryClient {
+    bytes32 internal constant SEASON_REGISTRY = "SeasonRegistry";
     IGameRegistry public registry; // address of the registry
     bytes32 public game; //name of the game
 

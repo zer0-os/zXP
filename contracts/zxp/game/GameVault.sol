@@ -10,7 +10,6 @@ import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {ISeasonRegistry} from "./interfaces/ISeasonRegistry.sol";
 
 contract GameVault is ERC721Wrapper, IGameVault, GameRegistryClient {
-    bytes32 internal constant SEASON_REGISTRY = "SeasonRegistry";
     mapping(uint id => uint block) public stakedAt;
 
     constructor(

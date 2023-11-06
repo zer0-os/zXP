@@ -18,7 +18,14 @@ contract XP is ERC20, GameRegistryClient {
         address to,
         uint amount
     ) internal virtual override {
-        require(from == address(0) || to == address(0), "Token is soulbound");
+        require(from == address(0) || to == address(0), "ZXP: Token soulbound");
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function awardXP(
+        address to,
+        uint amount
+    ) external override only(SEASON_REGISTRY) {
+        _mint(to, amount);
     }
 }
