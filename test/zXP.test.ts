@@ -61,7 +61,7 @@ describe("ZXP", () => {
         await gameVaultDeploy.deployed();
         gameVault = gameVaultDeploy;
 
-        const top3rewardsFactory = await hre.ethers.getContractFactory("Top3Rewards");
+        const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
         const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address);
         await top3deploy.deployed();
         top3Rewards = top3deploy;
