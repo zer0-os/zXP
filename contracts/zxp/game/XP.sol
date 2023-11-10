@@ -4,8 +4,9 @@ pragma solidity ^0.8.19;
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IXP} from "./interfaces/IXP.sol";
 
-contract XP is ERC20, GameRegistryClient {
+contract XP is ERC20, GameRegistryClient, IXP {
     constructor(
         IGameRegistry registry,
         bytes32 game,
