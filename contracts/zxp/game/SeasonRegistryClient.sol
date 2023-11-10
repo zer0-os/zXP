@@ -8,6 +8,8 @@ import {ISeasonRegistryClient} from "./interfaces/ISeasonRegistryClient.sol";
  * @dev Base contract for Registry clients
  */
 contract SeasonRegistryClient is ISeasonRegistryClient {
+    bytes32 internal constant STAKER_REWARDS = "StakerRewards";
+    bytes32 internal constant PLAYER_REWARDS = "PlayerRewards";
     ISeasonRegistry public registry; // address of the registry
     uint public season;
 
