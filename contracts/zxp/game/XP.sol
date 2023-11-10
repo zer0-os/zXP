@@ -8,10 +8,10 @@ import {IXP} from "./interfaces/IXP.sol";
 
 contract XP is ERC20, GameRegistryClient, IXP {
     constructor(
-        IGameRegistry registry,
-        bytes32 game,
         string memory name,
-        string memory symbol
+        string memory symbol,
+        IGameRegistry registry,
+        bytes32 game
     ) GameRegistryClient(registry, game) ERC20(name, symbol) {}
 
     function _beforeTokenTransfer(

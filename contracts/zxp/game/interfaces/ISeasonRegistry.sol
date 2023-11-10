@@ -17,4 +17,6 @@ interface ISeasonRegistry {
     function endSeason() external;
 
     function onUnstake(uint id, address to, uint blocks) external;
+
+    function awardXP(address to, uint amount) external;
 }

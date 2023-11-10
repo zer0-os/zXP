@@ -13,6 +13,7 @@ contract StakerRewards is IStakerRewards, SeasonRegistryClient {
     uint public rewardPerBlock;
     IERC721 private underlyingToken;
     IGameVault private underlyingVault;
+
     mapping(address awardee => uint amount) public rewards;
     mapping(uint nft => uint block) public claimedAt;
 

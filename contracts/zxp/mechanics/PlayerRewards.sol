@@ -40,5 +40,8 @@ contract PlayerRewards is SeasonRegistryClient, Ownable, IPlayerRewards {
         rewards[first] += firstReward;
         rewards[second] += secondReward;
         rewards[third] += thirdReward;
+        registry.awardXP(first, xpReward);
+        registry.awardXP(second, xpReward);
+        registry.awardXP(third, xpReward);
     }
 }

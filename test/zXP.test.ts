@@ -25,6 +25,7 @@ describe("ZXP", () => {
     let gameRegistry: Contract;
     let seasonRegistry: Contract;
     let gameVault: Contract;
+    let xp: Contract;
     let firstReward: string;
     let secondReward: string;
     let thirdReward: string;
@@ -61,6 +62,11 @@ describe("ZXP", () => {
         await gameVaultDeploy.deployed();
         gameVault = gameVaultDeploy;
 
+        const xpFactory = await hre.ethers.getContractFactory("XP");
+        const xpDeploy = await xpFactory.deploy("zXP", "XP", gameRegistry.address, gameName);
+        await xpDeploy.deployed();
+        xp = xpDeploy;
+
         const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
         const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address);
         await top3deploy.deployed();
@@ -92,6 +98,10 @@ describe("ZXP", () => {
     it("Registers GameVault", async () => {
         const gameVaultBytes = ethers.utils.formatBytes32String("GameVault");
         await gameRegistry.registerObjects(gameName, [gameVaultBytes], [gameVault.address]);
+    });
+    it("Registers XP", async () => {
+        const xpBytes = ethers.utils.formatBytes32String("XP");
+        await gameRegistry.registerObjects(gameName, [xpBytes], [xp.address]);
     });
     it("Registers SeasonRegistry", async () => {
         const sr = ethers.utils.formatBytes32String("SeasonRegistry");

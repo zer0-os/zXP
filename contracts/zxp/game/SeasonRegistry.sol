@@ -5,6 +5,7 @@ import {ISeasonRegistry} from "./interfaces/ISeasonRegistry.sol";
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {IStakerRewards} from "../mechanics/interfaces/IStakerRewards.sol";
+import {IXP} from "./interfaces/IXP.sol";
 
 contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     bytes32 internal constant OWNER = "Owner";
@@ -75,5 +76,9 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
             to,
             stakedAt
         );
+    }
+
+    function awardXP(address to, uint amount) public override {
+        IXP(registry.addressOf(XP, game)).awardXP(to, amount);
     }
 }
