@@ -5,13 +5,23 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IPlayerRewards} from "./interfaces/IPlayerRewards.sol";
+import {SeasonRegistryClient} from "../game/SeasonRegistryClient.sol";
+import {ISeasonRegistry} from "../game/interfaces/ISeasonRegistry.sol";
 
-contract PlayerRewards is Ownable, IPlayerRewards {
+contract PlayerRewards is SeasonRegistryClient, Ownable, IPlayerRewards {
     IERC20 public rewardToken;
+    uint public xpReward;
     mapping(address awardee => uint amount) public rewards;
 
-    constructor(address owner, IERC20 erc20RewardToken) {
+    constructor(
+        address owner,
+        IERC20 erc20RewardToken,
+        ISeasonRegistry registry,
+        uint season,
+        uint xpRewarded
+    ) SeasonRegistryClient(registry, season) {
         rewardToken = erc20RewardToken;
+        xpReward = xpRewarded;
         Ownable(owner);
     }
 

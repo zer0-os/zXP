@@ -36,7 +36,8 @@ contract SeasonRegistryClient is ISeasonRegistryClient {
      *
      * @param  _registry   address of a contract-registry contract
      */
-    constructor(ISeasonRegistry _registry) {
+    constructor(ISeasonRegistry _registry, uint _season) {
         registry = ISeasonRegistry(_registry);
+        season = _season;
     }
 }
