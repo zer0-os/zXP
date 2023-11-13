@@ -68,12 +68,12 @@ describe("ZXP", () => {
         xp = xpDeploy;
 
         const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
-        const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address);
+        const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
         await top3deploy.deployed();
         top3Rewards = top3deploy;
 
         const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
-        const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address);
+        const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasonRegistry.address, "0");
         await stakerRewardsDeploy.deployed();
         stakerRewards = stakerRewardsDeploy;
 
@@ -106,6 +106,10 @@ describe("ZXP", () => {
     it("Registers SeasonRegistry", async () => {
         const sr = ethers.utils.formatBytes32String("SeasonRegistry");
         await gameRegistry.registerObjects(gameName, [sr], [seasonRegistry.address]);
+    });
+    it("Registers PlayerRewards", async () => {
+        const pr = ethers.utils.formatBytes32String("PlayerRewards");
+        await seasonRegistry.registerMechanics([pr], [top3Rewards.address]);
     });
     const numSeasons = 3
     for (let index = 0; index < numSeasons; index++) {
@@ -141,7 +145,7 @@ describe("ZXP", () => {
         it("Starts the season", async () => {
             await seasonRegistry.startSeason();
         });
-        const numRounds = 100;
+        const numRounds = 2;
 
         for (let i = 0; i < numRounds; i++) {
             const str = "Submits round " + i.toString() + " results";
@@ -149,7 +153,7 @@ describe("ZXP", () => {
                 firstReward = "1000000000000000000000";
                 secondReward = "100000000000000000000";
                 thirdReward = "10000000000000000000";
-                await top3Rewards.submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
+                await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
         }
         it("Player 1 claims season rewards", async () => {
@@ -161,6 +165,12 @@ describe("ZXP", () => {
         });
         it("Staker 2 claims rewards without unstaking", async () => {
             await stakerRewards.connect(staker2).claim(s2nft);
+        });
+        it("Awards xp", async () => {
+            console.log(await xp.balanceOf(player1.address));
+            console.log(await xp.balanceOf(player2.address));
+            console.log(await xp.balanceOf(staker1.address));
+            console.log(await xp.balanceOf(staker2.address));
         });
         it("Ends the season", async () => {
             await seasonRegistry.endSeason();

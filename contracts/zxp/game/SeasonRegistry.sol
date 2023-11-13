@@ -8,8 +8,6 @@ import {IStakerRewards} from "../mechanics/interfaces/IStakerRewards.sol";
 import {IXP} from "./interfaces/IXP.sol";
 
 contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
-    bytes32 internal constant OWNER = "Owner";
-    bytes32 internal constant STAKER_REWARDS = "StakerRewards";
     uint public currentSeason;
     struct Season {
         string metadata;
@@ -79,6 +77,6 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     }
 
     function awardXP(address to, uint amount) public override {
-        IXP(registry.addressOf(XP, game)).awardXP(to, amount);
+        IXP(registry.addressOf(game, XP)).awardXP(to, amount);
     }
 }

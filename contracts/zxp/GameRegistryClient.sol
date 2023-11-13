@@ -10,7 +10,9 @@ import {IGameRegistryClient} from "./interfaces/IGameRegistryClient.sol";
 contract GameRegistryClient is IGameRegistryClient {
     bytes32 internal constant SEASON_REGISTRY = "SeasonRegistry";
     bytes32 internal constant GAME_VAULT = "GameVault";
+    bytes32 internal constant STAKER_REWARDS = "StakerRewards";
     bytes32 internal constant XP = "XP";
+    bytes32 internal constant OWNER = "Owner";
     IGameRegistry public registry; // address of the registry
     bytes32 public game; //name of the game
 
