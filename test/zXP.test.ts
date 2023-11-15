@@ -155,6 +155,11 @@ describe("ZXP", () => {
                 thirdReward = "10000000000000000000";
                 await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
+            it("Awards xp to winners", async () => {
+                console.log(await xp.balanceOf(p1));
+                console.log(await xp.balanceOf(p2));
+                console.log(await xp.balanceOf(p3));
+            });
         }
         it("Player 1 claims season rewards", async () => {
             await top3Rewards.connect(player1).claim(p1);
@@ -166,9 +171,7 @@ describe("ZXP", () => {
         it("Staker 2 claims rewards without unstaking", async () => {
             await stakerRewards.connect(staker2).claim(s2nft);
         });
-        it("Awards xp", async () => {
-            console.log(await xp.balanceOf(player1.address));
-            console.log(await xp.balanceOf(player2.address));
+        it("Awards xp to stakers", async () => {
             console.log(await xp.balanceOf(staker1.address));
             console.log(await xp.balanceOf(staker2.address));
         });
