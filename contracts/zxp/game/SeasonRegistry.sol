@@ -9,6 +9,8 @@ import {IXP} from "./interfaces/IXP.sol";
 
 contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
     uint public currentSeason;
+    uint public stakerXPReward = 100;
+
     struct Season {
         string metadata;
         uint start;
@@ -73,6 +75,10 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
             id,
             to,
             stakedAt
+        );
+        IXP(registry.addressOf(game, XP)).awardXP(
+            to,
+            stakerXPReward * (block.number - stakedAt)
         );
     }
 
