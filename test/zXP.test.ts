@@ -160,6 +160,9 @@ describe("ZXP", () => {
                 console.log(await xp.balanceOf(p2));
                 console.log(await xp.balanceOf(p3));
             });
+            it("Levels up", async () => {
+                console.log(await xp.getXPForLevel(i));
+            });
         }
         it("Player 1 claims season rewards", async () => {
             await top3Rewards.connect(player1).claim(p1);

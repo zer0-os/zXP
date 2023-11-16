@@ -29,4 +29,10 @@ contract XP is ERC20, GameRegistryClient, IXP {
     ) external override only(SEASON_REGISTRY) {
         _mint(to, amount);
     }
+
+    function getXPForLevel(
+        uint256 level
+    ) public pure override returns (uint256) {
+        return 100 * level * level;
+    }
 }
