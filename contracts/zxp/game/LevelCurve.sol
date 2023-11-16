@@ -4,13 +4,31 @@ pragma solidity ^0.8.19;
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {ILevelCurve} from "./interfaces/ILevelCurve.sol";
+import {Math} from "@openzeppelin/contracts/utils/Math.sol";
 
 contract LevelCurve is ILevelCurve {
-    uint256[] private levelThresholds;
-    uint256 private constant COEFFICIENT = 1000;
+    uint private intercept;
+    uint private coefficient;
+    uint256[] private thresholds;
+    mapping(uint threshold => Function curve) private curves;
 
-    constructor(uint256[] memory _initialThresholds) {
-        levelThresholds = _initialThresholds;
+    enum Function {
+        CONSTANT,
+        LINEAR,
+        QUADRATIC,
+        LOGARITHMIC,
+    }
+
+    constructor(
+        uint256[] memory initialThresholds,
+        uint256[] memory initialCurves,
+        uint initialCoefficient,
+        uint initialIntercept
+    ) {
+        thresholds = initialThresholds;
+        curves = initialCurves;
+        coefficient = initialCoefficient;
+        intercept = initialIntercept;
     }
 
     function getXPForLevel(
@@ -21,8 +39,16 @@ contract LevelCurve is ILevelCurve {
         if (level < levelThresholds.length) {
             xpRequired = levelThresholds[level - 1];
         } else {
-            xpRequired = COEFFICIENT * level * level; // Example of a quadratic growth rate for higher levels
+            xpRequired = coefficient * level * level; // Example of a quadratic growth rate for higher levels
         }
         return xpRequired;
+    }
+
+    function quadratic(uint x, uint origin) internal view returns (uint) {
+        return coefficient * (x - origin) * (x - origin) + intercept;
+    }
+
+    function linear(uint x, uint origin) internal view returns (uint) {
+        return coefficient * (x - origin) + intercept;
     }
 }
