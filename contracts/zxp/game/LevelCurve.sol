@@ -44,11 +44,22 @@ contract LevelCurve is ILevelCurve {
         return xpRequired;
     }
 
-    function quadratic(uint x, uint origin) internal view returns (uint) {
-        return coefficient * (x - origin) * (x - origin) + intercept;
+    function getLevelForXP(uint xp) external view override returns (uint){
+        (uint, uint xOffset, uint) = getCurve()
+        return sqrt(xp-xOffset) + yOffset;
     }
 
-    function linear(uint x, uint origin) internal view returns (uint) {
-        return coefficient * (x - origin) + intercept;
+    
+
+    function getCurve(uint level) public view override returns (uint, uint, uint){
+        if(xp >= thresholds[thesholds.length - 1]){}
+    }
+
+    function quadratic(uint x, uint xOffset, uint yOffset) internal view returns (uint) {
+        return coefficient * (x - xOffset) * (x - xOffset) + yOffset;
+    }
+
+    function linear(uint x, uint xOffset, uint yOffset) internal view returns (uint) {
+        return coefficient * (x - xOffset) + yOffset;
     }
 }
