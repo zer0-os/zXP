@@ -25,12 +25,12 @@ contract GameVault is ERC721Wrapper, IGameVault, GameRegistryClient {
         ERC721Wrapper(underlyingToken)
     {}
 
-    function _mint(address to, uint id) internal override {
+    function _safeMint(address to, uint256 id) internal override {
         stakedAt[id] = block.number;
-        super._mint(to, id);
+        super._safeMint(to, id);
     }
 
-    function _burn(uint id) internal override {
+    function _burn(uint256 id) internal override {
         ISeasonRegistry(registry.addressOf(game, SEASON_REGISTRY)).onUnstake(
             id,
             msg.sender,
