@@ -4,22 +4,18 @@ pragma solidity ^0.8.19;
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {ILevelCurve} from "./interfaces/ILevelCurve.sol";
-import {Math} from "@openzeppelin/contracts/utils/Math.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract QuadraticLevelCurve is ILevelCurve {
+    using Math for uint256;
+
     uint private intercept;
     uint private coefficient;
-    uint256[] private thresholds;
-    mapping(uint threshold => Function curve) private curves;
 
     constructor(
-        uint256[] memory initialThresholds,
-        uint256[] memory initialCurves,
         uint initialCoefficient,
         uint initialIntercept
     ) {
-        thresholds = initialThresholds;
-        curves = initialCurves;
         coefficient = initialCoefficient;
         intercept = initialIntercept;
     }
@@ -28,7 +24,7 @@ contract QuadraticLevelCurve is ILevelCurve {
         return coefficient * level * level;
     }
 
-    function levelAt(uint xp) external view override returns (uint) {
-        return sqrt(xp);
+    function levelAt(uint256 xp) external view override returns (uint) {
+        return Math.sqrt(xp);
     }
 }
