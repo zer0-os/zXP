@@ -13,7 +13,8 @@ contract XP is ERC20, GameRegistryClient, IXP {
         IGameRegistry registry,
         bytes32 game
     ) GameRegistryClient(registry, game) ERC20(name, symbol) {}
-
+    
+    /*
     function _beforeTokenTransfer(
         address from,
         address to,
@@ -21,7 +22,7 @@ contract XP is ERC20, GameRegistryClient, IXP {
     ) internal virtual override {
         require(from == address(0) || to == address(0), "ZXP: Token soulbound");
         super._beforeTokenTransfer(from, to, amount);
-    }
+    }*/
 
     function awardXP(
         address to,

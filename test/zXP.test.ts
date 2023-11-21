@@ -1,7 +1,7 @@
-import * as hre from "hardhat";
-import { ethers } from "ethers";
+import { ethers } from "hardhat";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+//import { ethers, Signer } from "ethers";
 import { expect } from "chai";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { GameRegistry, GameVault, MockERC20, MockERC721, PlayerRewards, SeasonRegistry, StakerRewards, XP } from "../typechain";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -9,11 +9,11 @@ require("@nomicfoundation/hardhat-chai-matchers");
 
 
 describe("ZXP", () => {
-    let deployer: SignerWithAddress;
-    let official: SignerWithAddress;
-    let player1: SignerWithAddress;
-    let player2: SignerWithAddress;
-    let player3: SignerWithAddress;
+    let deployer: Signer;
+    let official: Signer;
+    let player1: Signer;
+    let player2: Signer;
+    let player3: Signer;
     let p1: string;
     let p2: string;
     let p3: string;
@@ -21,8 +21,8 @@ describe("ZXP", () => {
     let s2: string;
     let officialAddress: string;
     let deployerAddress: string;
-    let staker1: SignerWithAddress;
-    let staker2: SignerWithAddress;
+    let staker1: Signer;
+    let staker2: Signer;
     let mockErc20: MockERC20;
     let mockErc721: MockERC721;
     let top3Rewards: PlayerRewards;
@@ -47,7 +47,8 @@ describe("ZXP", () => {
     let s2nft = 2;
 
     before(async () => {
-        [deployer, official, player1, player2, player3, staker1, staker2] = await hre.ethers.getSigners();
+        //const provider = new JsonRpcProvider("127.0.0.1:8545");
+        [deployer, official, player1, player2, player3, staker1, staker2] = await ethers.getSigners();
 
         const erc20Contracts = await hre.ethers.getContractFactory("MockERC20");
         const erc20 = await erc20Contracts.deploy("zToken", "WILD");
@@ -56,38 +57,38 @@ describe("ZXP", () => {
 
         const erc721Contracts = await hre.ethers.getContractFactory("MockERC721");
         const erc721 = await erc721Contracts.deploy("zToken", "WILD", "");
-        await erc721.deployed();
+        await erc721.waitForDeployment();
         mockErc721 = erc721;
 
         const gameRegFactory = await hre.ethers.getContractFactory("GameRegistry");
         const gameRegDeploy = await gameRegFactory.deploy();
-        await gameRegDeploy.deployed();
+        await gameRegDeploy.waitForDeployment();
         gameRegistry = gameRegDeploy;
 
         gameName = ethers.encodeBytes32String("game");
         const seasonRegFactory = await hre.ethers.getContractFactory("SeasonRegistry");
         const seasonRegDeploy = await seasonRegFactory.deploy(gameRegistryAddress, gameName);
-        await seasonRegDeploy.deployed();
+        await seasonRegDeploy.waitForDeployment();
         seasonRegistry = seasonRegDeploy;
 
         const gameVaultFactory = await hre.ethers.getContractFactory("GameVault");
         const gameVaultDeploy = await gameVaultFactory.deploy(mockErc721Address, mockErc20Address, "StakedNFT", "SNFT", gameRegistryAddress, gameName);
-        await gameVaultDeploy.deployed();
+        await gameVaultDeploy.waitForDeployment();
         gameVault = gameVaultDeploy;
 
         const xpFactory = await hre.ethers.getContractFactory("XP");
         const xpDeploy = await xpFactory.deploy("zXP", "XP", gameRegistryAddress, gameName);
-        await xpDeploy.deployed();
+        await xpDeploy.waitForDeployment();
         xp = xpDeploy;
 
         const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
         const top3deploy = await top3rewardsFactory.deploy(officialAddress, mockErc20Address, seasonRegistryAddress, "0", "100");
-        await top3deploy.deployed();
+        await top3deploy.waitForDeployment();
         top3Rewards = top3deploy;
 
         const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
         const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20Address, "10", gameVaultAddress, gameVaultAddress, seasonRegistryAddress, "0");
-        await stakerRewardsDeploy.deployed();
+        await stakerRewardsDeploy.waitForDeployment();
         stakerRewards = stakerRewardsDeploy;
 
         p1 = await player1.getAddress();
@@ -134,20 +135,20 @@ describe("ZXP", () => {
         });
         it("Staker 1 stakes NFT", async () => {
             console.log(s1nft);
-            await mockErc721.connect(s1)["safeTransferFrom(address,address,uint256)"](s1, gameVaultAddress, s1nft);
+            await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVaultAddress, s1nft);
         });
         it("Mints Staker 2 NFT", async () => {
             //s2nft = ethers.keccak256(ethers.encodeBytes32String((index + 1).toString()));
             s2nft = s2nft + 3;
             console.log(s2nft);
-            await mockErc721.connect(deployerAddress).mint(s2, s2nft);
+            await mockErc721.connect(deployer).mint(s2, s2nft);
         });
         it("Player2 stakes NFT", async () => {
-            await mockErc721.connect(s2)["safeTransferFrom(address,address,uint256)"](s2, gameVaultAddress, s2nft);
+            await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, gameVaultAddress, s2nft);
         });
         it("Funds player reward tokens", async () => {
-            //await mockErc20.connect(deployerAddress)["transfer(address,uint256)"](top3RewardsAddress, "1000000000000000000000000");
-            //await mockErc20.connect(deployerAddress)["transfer(address,uint256)"](stakerRewardsAddress, "1000000000000000000000000");
+            await mockErc20.connect(deployer).transfer(top3RewardsAddress, "1000000000000000000000000");
+            await mockErc20.connect(deployer).transfer(stakerRewardsAddress, "1000000000000000000000000");
         });
         it("Funds staker reward tokens", async () => {
             //await mockErc20.connect(deployerAddress)["transfer(address,uint256)"](top3RewardsAddress, "1000000000000000000000000");
@@ -181,7 +182,7 @@ describe("ZXP", () => {
         }
         it("Player 1 claims season rewards", async () => {
             //await top3Rewards.connect(player1).claim(p1);
-            expect(await mockErc20.balanceOf(p1) == firstReward);
+            expect((await mockErc20.balanceOf(p1)).toString() == firstReward);
         });
         it("Staker 1 unstakes and claims rewards", async () => {
             //await gameVault.connect(staker1).withdrawTo(s1, [s1nft]);
