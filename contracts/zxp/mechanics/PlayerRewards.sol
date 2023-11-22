@@ -19,9 +19,10 @@ contract PlayerRewards is SeasonRegistryClient, Ownable, IPlayerRewards {
         ISeasonRegistry registry,
         uint season,
         uint xpRewarded
-    ) SeasonRegistryClient(registry, season) Ownable(owner) {
+    ) SeasonRegistryClient(registry, season) {
         rewardToken = erc20RewardToken;
         xpReward = xpRewarded;
+        Ownable(owner);
     }
 
     function claim(address to) external override {
