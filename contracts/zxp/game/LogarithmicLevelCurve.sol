@@ -6,7 +6,7 @@ import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {ILevelCurve} from "./interfaces/ILevelCurve.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
-contract QuadraticLevelCurve is ILevelCurve {
+contract Log2LevelCurve is ILevelCurve {
     using Math for uint256;
 
     uint private intercept;
@@ -21,7 +21,7 @@ contract QuadraticLevelCurve is ILevelCurve {
     }
 
     function xpRequired(uint256 level) public view override returns (uint256) {
-        return coefficient * Math.log2(level)
+        return coefficient * Math.log2(level);
     }
 
     function levelAt(uint256 xp) external view override returns (uint) {
