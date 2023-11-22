@@ -17,9 +17,7 @@ contract LinearLevelCurve is ILevelCurve {
         intercept = initialIntercept;
     }
 
-    function xpRequired(
-        uint256 level
-    ) public view override returns (uint256) {
+    function xpRequired(uint256 level) public view override returns (uint256) {
         return coefficient * level;
     }
 

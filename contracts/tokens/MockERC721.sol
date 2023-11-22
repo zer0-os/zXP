@@ -42,10 +42,10 @@ contract MockERC721 is ERC721, AccessControl, IMockERC721 {
     ) ERC721(name, symbol) {
         _baseTokenURI = baseTokenURI;
 
-        //_setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
-        //_setupRole(MINTER_ROLE, _msgSender());
-        //_setupRole(PAUSER_ROLE, _msgSender());
+        _setupRole(MINTER_ROLE, _msgSender());
+        _setupRole(PAUSER_ROLE, _msgSender());
     }
 
     function _baseURI() internal view virtual override returns (string memory) {

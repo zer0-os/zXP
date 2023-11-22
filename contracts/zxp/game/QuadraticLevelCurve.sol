@@ -4,11 +4,8 @@ pragma solidity ^0.8.19;
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {ILevelCurve} from "./interfaces/ILevelCurve.sol";
-import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract QuadraticLevelCurve is ILevelCurve {
-    using Math for uint256;
-
     uint private intercept;
     uint private coefficient;
 
@@ -24,7 +21,7 @@ contract QuadraticLevelCurve is ILevelCurve {
         return coefficient * level * level;
     }
 
-    function levelAt(uint256 xp) external view override returns (uint) {
-        return Math.sqrt(xp);
+    function levelAt(uint xp) external view override returns (uint) {
+        return 1;//sqrt(xp);
     }
 }
