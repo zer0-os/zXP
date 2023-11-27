@@ -26,6 +26,7 @@ describe("ZXP", () => {
     let seasonRegistry: Contract;
     let gameVault: Contract;
     let xp: Contract;
+    let level: Contract;
     let firstReward: string;
     let secondReward: string;
     let thirdReward: string;
@@ -77,6 +78,11 @@ describe("ZXP", () => {
         await stakerRewardsDeploy.deployed();
         stakerRewards = stakerRewardsDeploy;
 
+        const levelFactory = await hre.ethers.getContractFactory("LevelCurve");
+        const levelDeploy = await levelFactory.deploy([], [], "24", "0");
+        await levelDeploy.deployed();
+        level = levelDeploy;
+
         p1 = player1.address;
         p2 = player2.address;
         p3 = player3.address;
@@ -111,6 +117,12 @@ describe("ZXP", () => {
         const pr = ethers.utils.formatBytes32String("PlayerRewards");
         await seasonRegistry.registerMechanics([pr], [top3Rewards.address]);
     });
+
+    it("Tests math", async () => {
+        const line = await level.sqrt("100");
+        console.log(line);
+    });
+
     const numSeasons = 3
     for (let index = 0; index < numSeasons; index++) {
         it("Mints staker 1 NFT", async () => {
@@ -118,13 +130,11 @@ describe("ZXP", () => {
             await mockErc721.connect(deployer).mint(s1, s1nft);
         });
         it("Staker 1 stakes NFT", async () => {
-            console.log(s1nft);
             await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVault.address, s1nft);
         });
         it("Mints Staker 2 NFT", async () => {
             //s2nft = ethers.utils.keccak256(ethers.utils.formatBytes32String((index + 1).toString()));
             s2nft = s2nft + 3;
-            console.log(s2nft);
             await mockErc721.connect(deployer).mint(s2, s2nft);
         });
         it("Player2 stakes NFT", async () => {
@@ -156,12 +166,12 @@ describe("ZXP", () => {
                 await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
             it("Awards xp to winners", async () => {
-                console.log(await xp.balanceOf(p1));
-                console.log(await xp.balanceOf(p2));
-                console.log(await xp.balanceOf(p3));
+                //console.log(await xp.balanceOf(p1));
+                //console.log(await xp.balanceOf(p2));
+                //console.log(await xp.balanceOf(p3));
             });
             it("Levels up", async () => {
-                console.log(await xp.getXPForLevel(i));
+                //console.log(await xp.getXPForLevel(i));
             });
         }
         it("Player 1 claims season rewards", async () => {
@@ -175,8 +185,8 @@ describe("ZXP", () => {
             await stakerRewards.connect(staker2).claim(s2nft);
         });
         it("Awards xp to stakers", async () => {
-            console.log(await xp.balanceOf(staker1.address));
-            console.log(await xp.balanceOf(staker2.address));
+            //console.log(await xp.balanceOf(staker1.address));
+            //console.log(await xp.balanceOf(staker2.address));
         });
         it("Ends the season", async () => {
             await seasonRegistry.endSeason();

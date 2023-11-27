@@ -4,8 +4,11 @@ pragma solidity ^0.8.19;
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {ILevelCurve} from "./interfaces/ILevelCurve.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract LevelCurve is ILevelCurve {
+    using Math for uint256;
+
     uint private intercept;
     uint private coefficient;
     uint256[] private thresholds;
@@ -46,5 +49,9 @@ contract LevelCurve is ILevelCurve {
 
     function linear(uint x, uint xOffset, uint yOffset) internal view returns (uint) {
         return coefficient * (x - xOffset) + yOffset;
+    }
+
+    function sqrt(uint256 x) public pure returns (uint256){
+        return Math.sqrt(x);
     }
 }

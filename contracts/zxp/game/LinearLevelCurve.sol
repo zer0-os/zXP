@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
-import {ILevelCurve} from "./interfaces/ILevelCurve.sol";
+import {ILinearLevelCurve} from "./interfaces/ILevelCurve.sol";
 
 contract LinearLevelCurve is ILevelCurve {
     uint private intercept;
