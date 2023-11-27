@@ -9,6 +9,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 contract LevelCurve is ILevelCurve {
     using Math for uint256;
 
+    uint test;
     uint private intercept;
     uint private coefficient;
     uint256[] private thresholds;
@@ -51,7 +52,16 @@ contract LevelCurve is ILevelCurve {
         return coefficient * (x - xOffset) + yOffset;
     }
 
-    function sqrt(uint256 x) public pure returns (uint256){
-        return Math.sqrt(x);
+    function testLine(uint x) public override{
+        test = linear(x, 0, 0);
+    }
+    function testQuad(uint x) external override{
+        test = quadratic(x, 0, 0);
+    }
+    function testSqrt(uint256 x) public override {
+        test = Math.sqrt(x);
+    }
+    function testLog(uint x) external override{
+        test = Math.log2(x);
     }
 }

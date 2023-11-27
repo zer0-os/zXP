@@ -6,5 +6,8 @@ interface ILevelCurve {
 
     function levelAt(uint xp) external view returns (uint256);
 
-    function sqrt(uint256 x) external pure returns (uint256);
+    function testLine(uint x) external;
+    function testQuad(uint x) external;
+    function testSqrt(uint256 x) external;
+    function testLog(uint x) external;
 }
