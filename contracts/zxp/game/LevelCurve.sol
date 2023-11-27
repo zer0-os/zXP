@@ -9,7 +9,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 contract LevelCurve is ILevelCurve {
     using Math for uint256;
 
-    uint test;
+    uint public test;
     uint private intercept;
     uint private coefficient;
     uint256[] private thresholds;

@@ -117,13 +117,52 @@ describe("ZXP", () => {
         const pr = ethers.utils.formatBytes32String("PlayerRewards");
         await seasonRegistry.registerMechanics([pr], [top3Rewards.address]);
     });
-
-    it("Tests math", async () => {
-        const line = await level.sqrt("100");
-        console.log(line);
+    const testint = "100";
+    it("Tests sqrt", async () => {
+        const tx = await level.testSqrt(testint);
+        const receipt = await tx.wait();
+        const gasUsed = receipt.cumulativeGasUsed.toNumber();
+        console.log(gasUsed);
+        const val = await level.test();
+        console.log(val.toNumber());
+    });
+    it("Tests line", async () => {
+        const tx = await level.testLine(testint);
+        const receipt = await tx.wait();
+        const gasUsed = receipt.cumulativeGasUsed.toNumber();
+        console.log(gasUsed);
+        const val = await level.test();
+        console.log(val.toNumber());
     });
 
-    const numSeasons = 3
+    it("Tests quad", async () => {
+        const tx = await level.testQuad(testint);
+        const receipt = await tx.wait();
+        const gasUsed = receipt.cumulativeGasUsed.toNumber();
+        console.log(gasUsed);
+        const val = await level.test();
+        console.log(val.toNumber());
+    });
+
+    it("Tests sqrt", async () => {
+        const tx = await level.testSqrt(testint);
+        const receipt = await tx.wait();
+        const gasUsed = receipt.cumulativeGasUsed.toNumber();
+        console.log(gasUsed);
+        const val = await level.test();
+        console.log(val.toNumber());
+    });
+
+    it("Tests log", async () => {
+        const tx = await level.testLog(testint);
+        const receipt = await tx.wait();
+        const gasUsed = receipt.cumulativeGasUsed.toNumber();
+        console.log(gasUsed);
+        const val = await level.test();
+        console.log(val.toNumber());
+    });
+
+    const numSeasons = 6
     for (let index = 0; index < numSeasons; index++) {
         it("Mints staker 1 NFT", async () => {
             s1nft = s1nft + 3;
@@ -155,7 +194,7 @@ describe("ZXP", () => {
         it("Starts the season", async () => {
             await seasonRegistry.startSeason();
         });
-        const numRounds = 2;
+        const numRounds = 20;
 
         for (let i = 0; i < numRounds; i++) {
             const str = "Submits round " + i.toString() + " results";
