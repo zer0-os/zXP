@@ -3,9 +3,9 @@ pragma solidity ^0.8.19;
 
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {GameRegistryClient} from "../GameRegistryClient.sol";
-import {ILevelCurve} from "./interfaces/ILevelCurve.sol";
+import {IQuadraticLevelCurve} from "./interfaces/IQuadraticLevelCurve.sol";
 
-contract QuadraticLevelCurve is ILevelCurve {
+contract QuadraticLevelCurve is IQuadraticLevelCurve {
     uint private intercept;
     uint private coefficient;
 
