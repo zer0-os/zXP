@@ -172,7 +172,6 @@ describe("ZXP", () => {
             await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVault.address, s1nft);
         });
         it("Mints Staker 2 NFT", async () => {
-            //s2nft = ethers.utils.keccak256(ethers.utils.formatBytes32String((index + 1).toString()));
             s2nft = s2nft + 3;
             await mockErc721.connect(deployer).mint(s2, s2nft);
         });
