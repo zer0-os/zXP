@@ -23,13 +23,20 @@ contract LevelCurve is ILevelCurve {
 
     constructor(
         uint256[] memory initialThresholds,
-        uint256[] memory initialCurves,
+        Function[] memory initialCurves,
         uint initialCoefficient,
         uint initialIntercept
     ) {
+        require(
+            initialThresholds.length == initialCurves.length,
+            "Thresholds and curves length must be equal"
+        );
         thresholds = initialThresholds;
         coefficient = initialCoefficient;
         intercept = initialIntercept;
+        for (uint256 i = 0; i < initialThresholds.length; i++) {
+            curves[initialThresholds[i]] = initialCurves[i];
+        }
     }
 
     function xpRequired(uint256 level) public view override returns (uint256) {
@@ -38,7 +45,7 @@ contract LevelCurve is ILevelCurve {
     }
 
     function levelAt(uint xp) external view override returns (uint) {
-        return xp;
+        return coefficient * xp;
     }
 
     function quadratic(

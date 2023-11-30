@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
-import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {IQuadraticLevelCurve} from "./interfaces/IQuadraticLevelCurve.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -20,6 +19,6 @@ contract QuadraticLevelCurve is IQuadraticLevelCurve {
     }
 
     function levelAt(uint xp) external view override returns (uint) {
-        return Math.sqrt(xp);
+        return coefficient * Math.sqrt(xp) + yIntercept;
     }
 }
