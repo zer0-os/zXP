@@ -6,22 +6,19 @@ import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {ILinearLevelCurve} from "./interfaces/ILinearLevelCurve.sol";
 
 contract LinearLevelCurve is ILinearLevelCurve {
-    uint private intercept;
+    uint private yIntercept;
     uint private coefficient;
 
-    constructor(
-        uint initialCoefficient,
-        uint initialIntercept
-    ) {
+    constructor(uint initialCoefficient, uint initialIntercept) {
         coefficient = initialCoefficient;
-        intercept = initialIntercept;
+        yIntercept = initialIntercept;
     }
 
     function xpRequired(uint256 level) public view override returns (uint256) {
-        return coefficient * level;
+        return coefficient * level + yIntercept;
     }
 
     function levelAt(uint xp) external view override returns (uint) {
-        return xp / coefficient;
+        return xp / coefficient + yIntercept;
     }
 }
