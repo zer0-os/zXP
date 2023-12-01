@@ -7,7 +7,7 @@ import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {IStakerRewards} from "../mechanics/interfaces/IStakerRewards.sol";
 import {IXP} from "./interfaces/IXP.sol";
 
-contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
+contract Seasons is ObjectRegistryClient, ISeasonRegistry {
     uint public currentSeason;
     uint public stakerXPReward = 100;
 
@@ -15,7 +15,7 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
         string metadata;
         uint start;
         uint end;
-        mapping(bytes32 name => address mechanicAddress) mechanics;
+        mapping(bytes32 name => address objectAddress) objects;
     }
     mapping(uint season => Season data) public seasons;
 
@@ -28,18 +28,6 @@ contract SeasonRegistry is GameRegistryClient, ISeasonRegistry {
         IGameRegistry registry,
         bytes32 game
     ) GameRegistryClient(registry, game) {}
-
-    function registerMechanics(
-        bytes32[] calldata mechanicNames,
-        address[] calldata mechanicAddresses
-    ) public override only(OWNER) preseason(currentSeason) {
-        require(mechanicNames.length > 0, "ZXP: Invalid name");
-        for (uint256 i = 0; i < mechanicNames.length; i++) {
-            seasons[currentSeason].mechanics[
-                mechanicNames[i]
-            ] = mechanicAddresses[i];
-        }
-    }
 
     function startSeason()
         external

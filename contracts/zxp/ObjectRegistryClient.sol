@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IGameRegistry} from "./interfaces/IGameRegistry.sol";
-import {IGameRegistryClient} from "./interfaces/IGameRegistryClient.sol";
+import {IObjectRegistry} from "./interfaces/IGameRegistry.sol";
 
 /**
  * @dev Base contract for Registry clients
  */
-contract GameRegistryClient is IGameRegistryClient {
+contract ObjectRegistryClient is IObjectRegistryClient {
     bytes32 internal constant SEASON_REGISTRY = "SeasonRegistry";
     bytes32 internal constant GAME_VAULT = "GameVault";
     bytes32 internal constant STAKER_REWARDS = "StakerRewards";

@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import {IGameRegistry} from "./interfaces/IGameRegistry.sol";
 import {ObjectRegistry} from "./ObjectRegistry.sol";
 
-contract GameRegistry is IGameRegistry, ObjectRegistry {
+contract Games is IGameRegistry, ObjectRegistry {
     bytes32 internal constant OWNER = "Owner";
     struct Game {
         string metadata;

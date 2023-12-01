@@ -115,7 +115,7 @@ describe("ZXP", () => {
     });
     it("Registers PlayerRewards", async () => {
         const pr = ethers.utils.formatBytes32String("PlayerRewards");
-        await seasonRegistry.registerMechanics([pr], [top3Rewards.address]);
+        await seasonRegistry.registerObjects([pr], [top3Rewards.address]);
     });
     const testint = "100";
     it("Tests sqrt", async () => {
@@ -188,7 +188,7 @@ describe("ZXP", () => {
         });
         it("Registers StakerReward mechanic", async () => {
             const sr = ethers.utils.formatBytes32String("StakerRewards");
-            await seasonRegistry.registerMechanics([sr], [stakerRewards.address]);
+            await seasonRegistry.registerObjects([sr], [stakerRewards.address]);
         });
         it("Starts the season", async () => {
             await seasonRegistry.startSeason();
