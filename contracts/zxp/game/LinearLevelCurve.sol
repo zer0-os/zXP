@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
-import {GameRegistryClient} from "../GameRegistryClient.sol";
 import {ILinearLevelCurve} from "./interfaces/ILinearLevelCurve.sol";
 
 contract LinearLevelCurve is ILinearLevelCurve {

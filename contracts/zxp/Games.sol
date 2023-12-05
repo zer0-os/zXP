@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IGameRegistry} from "./interfaces/IGameRegistry.sol";
+import {IGames} from "./interfaces/IGameRegistry.sol";
 import {ObjectRegistry} from "./ObjectRegistry.sol";
 
-contract Games is IGameRegistry, ObjectRegistry {
+contract Games is IGames, ObjectRegistry {
     bytes32 internal constant OWNER = "Owner";
     struct Game {
         string metadata;
