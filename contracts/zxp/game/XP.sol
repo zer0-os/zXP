@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
-import {GameRegistryClient} from "../GameRegistryClient.sol";
+import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
+import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IXP} from "./interfaces/IXP.sol";
 
-contract XP is ERC20, GameRegistryClient, IXP {
+contract XP is ERC20, ObjectRegistryClient, IXP {
+    bytes32 internal constant SEASONS = "Seasons";
+
     constructor(
         string memory name,
         string memory symbol,
-        IGameRegistry registry,
+        IObjectRegistry registry,
         bytes32 game
-    ) GameRegistryClient(registry, game) ERC20(name, symbol) {}
+    ) ObjectRegistryClient(registry) ERC20(name, symbol) {}
 
     function _beforeTokenTransfer(
         address from,
@@ -23,10 +25,7 @@ contract XP is ERC20, GameRegistryClient, IXP {
         super._beforeTokenTransfer(from, to, amount);
     }
 
-    function awardXP(
-        address to,
-        uint amount
-    ) external override only(SEASON_REGISTRY) {
+    function awardXP(address to, uint amount) external override only(SEASONS) {
         _mint(to, amount);
     }
 

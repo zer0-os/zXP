@@ -7,5 +7,5 @@ interface IObjectRegistry {
         address[] calldata objectAddresses
     ) external;
 
-    function addressOf(bytes32 objectName) external returns (address);
+    function addressOf(bytes32 objectName) external view returns (address);
 }

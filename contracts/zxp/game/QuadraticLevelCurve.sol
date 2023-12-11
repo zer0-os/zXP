@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {IQuadraticLevelCurve} from "./interfaces/IQuadraticLevelCurve.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 

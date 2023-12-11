@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IGames} from "./interfaces/IGameRegistry.sol";
+import {IGames} from "./interfaces/IGames.sol";
 import {ObjectRegistry} from "./ObjectRegistry.sol";
 
-contract Games is IGames, ObjectRegistry {
+contract Games is IGames {
     bytes32 internal constant OWNER = "Owner";
     struct Game {
         string metadata;
-        mapping(bytes32 objectName => address objectAddress) objects;
+        ObjectRegistry objects;
     }
     mapping(bytes32 name => Game game) public games;
 
@@ -19,29 +19,11 @@ contract Games is IGames, ObjectRegistry {
         bytes32[] calldata objectNames,
         address[] calldata objectAddresses
     ) external override {
+        ObjectRegistry newRegistry = new ObjectRegistry(owner);
         games[name].metadata = metadata;
-        games[name].objects[OWNER] = owner;
+        games[name].objects = newRegistry;
         if (objectNames.length > 0) {
-            registerObjects(name, objectNames, objectAddresses);
+            newRegistry.registerObjects(objectNames, objectAddresses);
         }
-    }
-
-    function registerObjects(
-        bytes32 game,
-        bytes32[] calldata objectNames,
-        address[] calldata objectAddresses
-    ) public override {
-        require(msg.sender == games[game].objects[OWNER], "ZXP not game owner");
-        require(objectNames.length > 0, "ZXP: Objects empty");
-        for (uint256 i = 0; i < objectNames.length; i++) {
-            games[game].objects[objectNames[i]] = objectAddresses[i];
-        }
-    }
-
-    function addressOf(
-        bytes32 game,
-        bytes32 objectName
-    ) external view override returns (address) {
-        return games[game].objects[objectName];
     }
 }

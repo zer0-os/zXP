@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-interface IGameRegistry {
+interface IGames {
     function createGame(
         bytes32 name,
         address owner,
@@ -9,15 +9,4 @@ interface IGameRegistry {
         bytes32[] calldata objectNames,
         address[] calldata objectAddresses
     ) external;
-
-    function registerObjects(
-        bytes32 name,
-        bytes32[] calldata objectNames,
-        address[] calldata objectAddresses
-    ) external;
-
-    function addressOf(
-        bytes32 game,
-        bytes32 objectName
-    ) external view returns (address);
 }

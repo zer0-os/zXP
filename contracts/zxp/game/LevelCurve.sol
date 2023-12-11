@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
 import {ILevelCurve} from "./interfaces/ILevelCurve.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract LevelCurve is ILevelCurve {
     using Math for uint;
 
-    uint public test;
     uint private intercept;
     uint private coefficient;
     uint256[] private thresholds;
@@ -62,21 +60,5 @@ contract LevelCurve is ILevelCurve {
         uint yOffset
     ) internal view returns (uint) {
         return coefficient * (x - xOffset) + yOffset;
-    }
-
-    function testLine(uint x) external override {
-        test = coefficient * x;
-    }
-
-    function testQuad(uint x) external override {
-        test = coefficient * x * x;
-    }
-
-    function testSqrt(uint x) external override {
-        test = coefficient * Math.sqrt(x);
-    }
-
-    function testLog(uint x) external override {
-        test = coefficient * Math.log2(x);
     }
 }

@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {ISeasonRegistry} from "./interfaces/ISeasonRegistry.sol";
-import {IGameRegistry} from "../interfaces/IGameRegistry.sol";
-import {GameRegistryClient} from "../GameRegistryClient.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ISeasons} from "./interfaces/ISeasons.sol";
+import {ObjectRegistry, IObjectRegistry} from "../ObjectRegistry.sol";
+import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
 import {IStakerRewards} from "../mechanics/interfaces/IStakerRewards.sol";
 import {IXP} from "./interfaces/IXP.sol";
 
-contract Seasons is ObjectRegistryClient, ISeasonRegistry {
+contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
+    bytes32 internal constant GAME_VAULT = "GameVault";
+    bytes32 internal constant STAKER_REWARDS = "StakerRewards";
+    bytes32 internal constant XP = "XP";
     uint public currentSeason;
     uint public stakerXPReward = 100;
 
@@ -15,7 +19,7 @@ contract Seasons is ObjectRegistryClient, ISeasonRegistry {
         string metadata;
         uint start;
         uint end;
-        mapping(bytes32 name => address objectAddress) objects;
+        ObjectRegistry objects;
     }
     mapping(uint season => Season data) public seasons;
 
@@ -25,14 +29,17 @@ contract Seasons is ObjectRegistryClient, ISeasonRegistry {
     }
 
     constructor(
-        IGameRegistry registry,
+        IObjectRegistry registry,
         bytes32 game
-    ) GameRegistryClient(registry, game) {}
+    ) ObjectRegistryClient(registry) {
+        Ownable(msg.sender);
+        seasons[currentSeason].objects = new ObjectRegistry(msg.sender);
+    }
 
     function startSeason()
         external
         override
-        only(OWNER)
+        onlyOwner
         preseason(currentSeason)
     {
         seasons[currentSeason].start = block.number;
@@ -41,17 +48,11 @@ contract Seasons is ObjectRegistryClient, ISeasonRegistry {
     /**
         @dev sets currentSeason.end and increments currentSeason
      */
-    function endSeason() external override only(OWNER) {
+    function endSeason() external override onlyOwner {
         require(seasons[currentSeason].start != 0, "ZXP season not started");
         seasons[currentSeason].end = block.number;
         currentSeason++;
-    }
-
-    function addressOf(
-        uint256 season,
-        bytes32 name
-    ) public view override returns (address) {
-        return seasons[season].mechanics[name];
+        seasons[currentSeason].objects = new ObjectRegistry(msg.sender);
     }
 
     function onUnstake(
@@ -59,18 +60,14 @@ contract Seasons is ObjectRegistryClient, ISeasonRegistry {
         address to,
         uint stakedAt
     ) external override only(GAME_VAULT) {
-        IStakerRewards(addressOf(currentSeason, STAKER_REWARDS)).onUnstake(
+        IStakerRewards(registry.addressOf(STAKER_REWARDS)).onUnstake(
             id,
             to,
             stakedAt
         );
-        IXP(registry.addressOf(game, XP)).awardXP(
+        IXP(registry.addressOf(XP)).awardXP(
             to,
             stakerXPReward * (block.number - stakedAt)
         );
-    }
-
-    function awardXP(address to, uint amount) public override {
-        IXP(registry.addressOf(game, XP)).awardXP(to, amount);
     }
 }
