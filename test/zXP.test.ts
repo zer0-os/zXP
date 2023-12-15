@@ -172,7 +172,7 @@ describe("ZXP", () => {
             expect(await mockErc20.balanceOf(p1) == firstReward);
         });
         it("Staker 1 unstakes and claims rewards", async () => {
-            //await gameVault.connect(staker1).withdrawTo(s1, [s1nft]);
+            await gameVault.connect(staker1).withdrawTo(s1, [s1nft]);
         });
         it("Staker 2 claims rewards without unstaking", async () => {
             await stakerRewards.connect(staker2).claim(s2nft);
