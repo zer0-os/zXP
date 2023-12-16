@@ -33,7 +33,7 @@ contract GameVault is ERC721Wrapper, IGameVault, ObjectRegistryClient {
 
     function _burn(uint id) internal override {
         ISeasons(registry.addressOf(SEASONS)).onUnstake(
-            id,
+            id,kjjb
             msg.sender,
             block.number - stakedAt[id]
         );
