@@ -22,6 +22,8 @@ describe("ZXP", () => {
     let mockErc721: Contract;
     let top3Rewards: Contract;
     let stakerRewards: Contract;
+    let games: Contract;
+    let seasons: Contract;
     let gameRegistry: Contract;
     let seasonRegistry: Contract;
     let gameVault: Contract;
@@ -33,7 +35,6 @@ describe("ZXP", () => {
     let gameName: string;
     let s1nft = 1;
     let s2nft = 2;
-    let storedGameObjects: Contract;
     let storedSeasonObjects: Contract;
 
     before(async () => {
@@ -49,16 +50,23 @@ describe("ZXP", () => {
         await erc721.deployed();
         mockErc721 = erc721;
 
+        gameName = ethers.utils.formatBytes32String("game0");
         const gamesFactory = await hre.ethers.getContractFactory("Games");
         const gamesDeploy = await gamesFactory.deploy();
         await gamesDeploy.deployed();
-        gameRegistry = gamesDeploy;
+        games = gamesDeploy;
 
-        gameName = ethers.utils.formatBytes32String("game0");
+        //create empty game
+        await games.createGame(gameName, deployer.address, "description", [], []);
+        const storedGame = await games.games(gameName);
+        const gameObjects = storedGame.objects;
+        const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");
+        gameRegistry = await ObjectRegistryFactory.attach(gameObjects);
+
         const seasonFactory = await hre.ethers.getContractFactory("Seasons");
         const seasonDeploy = await seasonFactory.deploy(gameRegistry.address, gameName);
         await seasonDeploy.deployed();
-        seasonRegistry = seasonDeploy;
+        seasons = seasonDeploy;
 
         const gameVaultFactory = await hre.ethers.getContractFactory("GameVault");
         const gameVaultDeploy = await gameVaultFactory.deploy(mockErc721.address, mockErc20.address, "StakedNFT", "SNFT", gameRegistry.address, gameName);
@@ -69,16 +77,6 @@ describe("ZXP", () => {
         const xpDeploy = await xpFactory.deploy("zXP", "XP", gameRegistry.address, gameName);
         await xpDeploy.deployed();
         xp = xpDeploy;
-
-        const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
-        const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
-        await top3deploy.deployed();
-        top3Rewards = top3deploy;
-
-        const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
-        const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasonRegistry.address, "0");
-        await stakerRewardsDeploy.deployed();
-        stakerRewards = stakerRewardsDeploy;
 
         const levelFactory = await hre.ethers.getContractFactory("LevelCurve");
         const levelDeploy = await levelFactory.deploy([], [], "24", "0");
@@ -93,30 +91,23 @@ describe("ZXP", () => {
     });
 
     it("Creates empty game", async () => {
-        await gameRegistry.createGame(gameName, deployer.address, "description", [], []);
+        await games.createGame("testgame", deployer.address, "description", [], []);
     });
     it("Registers GameVault", async () => {
         const gameVaultBytes = ethers.utils.formatBytes32String("GameVault");
-
-        const storedGame = await gameRegistry.games(gameName);
-        const storedRegistry = storedGame.objects;
-
-        const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");
-        storedGameObjects = await ObjectRegistryFactory.attach(storedRegistry);
-
-        await storedGameObjects.registerObjects([gameVaultBytes], [gameVault.address]);
+        await gameRegistry.registerObjects([gameVaultBytes], [gameVault.address]);
     });
     it("Registers XP", async () => {
         const xpBytes = ethers.utils.formatBytes32String("XP");
-        await storedGameObjects.registerObjects([xpBytes], [xp.address]);
+        await gameRegistry.registerObjects([xpBytes], [xp.address]);
     });
     it("Registers SeasonRegistry", async () => {
         const sr = ethers.utils.formatBytes32String("Seasons");
-        await storedGameObjects.registerObjects([sr], [seasonRegistry.address]);
+        await gameRegistry.registerObjects([sr], [seasons.address]);
     });
     it("Registers PlayerRewards", async () => {
         const pr = ethers.utils.formatBytes32String("PlayerRewards");
-        await storedGameObjects.registerObjects([pr], [top3Rewards.address]);
+        await gameRegistry.registerObjects([pr], [top3Rewards.address]);
     });
 
     const numSeasons = 3
@@ -147,17 +138,15 @@ describe("ZXP", () => {
             const sr = ethers.utils.formatBytes32String("StakerRewards");
             const storedSeason = await seasonRegistry.seasons(i);
             const storedRegistry = storedSeason.objects;
-
             const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");
             storedSeasonObjects = await ObjectRegistryFactory.attach(storedRegistry);
-
             await storedSeasonObjects.registerObjects([sr], [stakerRewards.address]);
         });
         it("Starts the season", async () => {
             await seasonRegistry.startSeason();
         });
-        const numRounds = 10;
 
+        const numRounds = 10;
         for (let i = 0; i < numRounds; i++) {
             const str = "Submits round " + i.toString() + " results";
             it(str, async () => {

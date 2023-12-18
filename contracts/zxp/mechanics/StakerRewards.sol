@@ -8,7 +8,7 @@ import {IGameVault} from "../game/interfaces/IGameVault.sol";
 import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
 import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
 
-contract StakerRewards is IStakerRewards, ObjectRegistryClient {
+contract StakerRewards is ObjectRegistryClient, IStakerRewards {
     IERC20 public rewardToken;
     uint public rewardPerBlock;
     IERC721 private underlyingToken;

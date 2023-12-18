@@ -9,7 +9,7 @@ import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
 import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
 import {ISeasons} from "./interfaces/ISeasons.sol";
 
-contract GameVault is ERC721Wrapper, IGameVault, ObjectRegistryClient {
+contract GameVault is ERC721Wrapper, ObjectRegistryClient, IGameVault {
     bytes32 internal constant SEASONS = "Seasons";
     mapping(uint id => uint block) public stakedAt;
 
@@ -33,7 +33,7 @@ contract GameVault is ERC721Wrapper, IGameVault, ObjectRegistryClient {
 
     function _burn(uint id) internal override {
         ISeasons(registry.addressOf(SEASONS)).onUnstake(
-            id,kjjb
+            id,
             msg.sender,
             block.number - stakedAt[id]
         );
