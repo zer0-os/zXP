@@ -78,11 +78,6 @@ describe("ZXP", () => {
         await xpDeploy.deployed();
         xp = xpDeploy;
 
-        const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
-        const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasonRegistry.address, "0");
-        await stakerRewardsDeploy.deployed();
-        stakerRewards = stakerRewardsDeploy;
-
         const levelFactory = await hre.ethers.getContractFactory("LevelCurve");
         const levelDeploy = await levelFactory.deploy([], [], "24", "0");
         await levelDeploy.deployed();
@@ -93,10 +88,6 @@ describe("ZXP", () => {
         p3 = player3.address;
         s1 = staker1.address;
         s2 = staker2.address;
-    });
-
-    it("Creates empty game", async () => {
-        await games.createGame("testgame", deployer.address, "description", [], []);
     });
     it("Registers GameVault", async () => {
         const gameVaultBytes = ethers.utils.formatBytes32String("GameVault");
@@ -109,10 +100,6 @@ describe("ZXP", () => {
     it("Registers SeasonRegistry", async () => {
         const sr = ethers.utils.formatBytes32String("Seasons");
         await gameRegistry.registerObjects([sr], [seasons.address]);
-    });
-    it("Registers PlayerRewards", async () => {
-        const pr = ethers.utils.formatBytes32String("PlayerRewards");
-        await gameRegistry.registerObjects([pr], [top3Rewards.address]);
     });
 
     const numSeasons = 3
@@ -140,27 +127,31 @@ describe("ZXP", () => {
             await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
         });
         it("Gets season registry", async () => {
-            const sr = ethers.utils.formatBytes32String("StakerRewards");
-            const storedSeason = await seasonRegistry.seasons(i);
+            const storedSeason = await seasons.seasons(i);
             const storedRegistry = storedSeason.objects;
             const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");
             seasonRegistry = await ObjectRegistryFactory.attach(storedRegistry);
-            await storedSeasonObjects.registerObjects([sr], [stakerRewards.address]);
+        });
+        it("Registers StakerRewards", async () => {
+            const sr = ethers.utils.formatBytes32String("StakerRewards");
+            await seasonRegistry.registerObjects([sr], [stakerRewards.address]);
+        });
+        it("Registers PlayerRewards", async () => {
+            const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
+            const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
+            await top3deploy.deployed();
+            top3Rewards = top3deploy;
 
-            const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
-            const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
-            await top3deploy.deployed();
-            top3Rewards = top3deploy;
+            const pr = ethers.utils.formatBytes32String("PlayerRewards");
+            await seasonRegistry.registerObjects([pr], [top3Rewards.address]);
         });
-        it("Registers StakerReward mechanic", async () => {
-            await storedSeasonObjects.registerObjects([sr], [stakerRewards.address]);
+        it("Registers PlayerRewards", async () => {
+            const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
+            const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasonRegistry.address, "0");
+            await stakerRewardsDeploy.deployed();
+            stakerRewards = stakerRewardsDeploy;
         });
-        it("Registers PlayerReward mechanic", async () => {
-            const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
-            const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
-            await top3deploy.deployed();
-            top3Rewards = top3deploy;
-        });
+
         it("Starts the season", async () => {
             await seasons.startSeason();
         });
