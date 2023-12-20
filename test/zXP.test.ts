@@ -78,6 +78,16 @@ describe("ZXP", () => {
         await xpDeploy.deployed();
         xp = xpDeploy;
 
+        const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
+        const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
+        await top3deploy.deployed();
+        top3Rewards = top3deploy;
+
+        const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
+        const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasonRegistry.address, "0");
+        await stakerRewardsDeploy.deployed();
+        stakerRewards = stakerRewardsDeploy;
+
         const levelFactory = await hre.ethers.getContractFactory("LevelCurve");
         const levelDeploy = await levelFactory.deploy([], [], "24", "0");
         await levelDeploy.deployed();
