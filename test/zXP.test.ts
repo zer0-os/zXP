@@ -78,11 +78,6 @@ describe("ZXP", () => {
         await xpDeploy.deployed();
         xp = xpDeploy;
 
-        const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
-        const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
-        await top3deploy.deployed();
-        top3Rewards = top3deploy;
-
         const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
         const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasonRegistry.address, "0");
         await stakerRewardsDeploy.deployed();
@@ -144,16 +139,30 @@ describe("ZXP", () => {
             await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
             await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
         });
-        it("Registers StakerReward mechanic", async () => {
+        it("Gets season registry", async () => {
             const sr = ethers.utils.formatBytes32String("StakerRewards");
             const storedSeason = await seasonRegistry.seasons(i);
             const storedRegistry = storedSeason.objects;
             const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");
-            storedSeasonObjects = await ObjectRegistryFactory.attach(storedRegistry);
+            seasonRegistry = await ObjectRegistryFactory.attach(storedRegistry);
+            await storedSeasonObjects.registerObjects([sr], [stakerRewards.address]);
+
+            const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
+            const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
+            await top3deploy.deployed();
+            top3Rewards = top3deploy;
+        });
+        it("Registers StakerReward mechanic", async () => {
             await storedSeasonObjects.registerObjects([sr], [stakerRewards.address]);
         });
+        it("Registers PlayerReward mechanic", async () => {
+            const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
+            const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
+            await top3deploy.deployed();
+            top3Rewards = top3deploy;
+        });
         it("Starts the season", async () => {
-            await seasonRegistry.startSeason();
+            await seasons.startSeason();
         });
 
         const numRounds = 10;
