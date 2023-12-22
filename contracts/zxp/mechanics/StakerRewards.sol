@@ -5,12 +5,14 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IStakerRewards} from "./interfaces/IStakerRewards.sol";
 import {IGameVault} from "../game/interfaces/IGameVault.sol";
+import {ISeasons} from "../game/interfaces/ISeasons.sol";
 import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
 import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
 
 contract StakerRewards is ObjectRegistryClient, IStakerRewards {
     IERC20 public rewardToken;
     uint public rewardPerBlock;
+    ISeasons public seasons;
     IERC721 private underlyingToken;
     IGameVault private underlyingVault;
 
@@ -18,7 +20,7 @@ contract StakerRewards is ObjectRegistryClient, IStakerRewards {
     mapping(uint nft => uint block) public claimedAt;
 
     modifier onlyRegistry(address checked) {
-        require(checked == address(registry), "ZXP: not registry");
+        require(checked == address(seasons), "ZXP: not registry");
         _;
     }
 
@@ -28,6 +30,7 @@ contract StakerRewards is ObjectRegistryClient, IStakerRewards {
         IERC721 nft,
         IGameVault vault,
         IObjectRegistry registry,
+        ISeasons seasons,
         uint season
     ) ObjectRegistryClient(registry) {
         rewardToken = erc20RewardToken;

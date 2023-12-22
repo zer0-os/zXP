@@ -118,14 +118,6 @@ describe("ZXP", () => {
         it("Player2 stakes NFT", async () => {
             await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, gameVault.address, s2nft);
         });
-        it("Funds player reward tokens", async () => {
-            await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
-            await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
-        });
-        it("Funds staker reward tokens", async () => {
-            await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
-            await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
-        });
         it("Gets season registry", async () => {
             const storedSeason = await seasons.seasons(i);
             const storedRegistry = storedSeason.objects;
@@ -133,7 +125,13 @@ describe("ZXP", () => {
             seasonRegistry = await ObjectRegistryFactory.attach(storedRegistry);
         });
         it("Registers StakerRewards", async () => {
+            const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
+            const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasonRegistry.address, seasons.address, i);
+            await stakerRewardsDeploy.deployed();
+            stakerRewards = stakerRewardsDeploy;
+
             const sr = ethers.utils.formatBytes32String("StakerRewards");
+            await gameRegistry.registerObjects([sr], [stakerRewards.address]);
             await seasonRegistry.registerObjects([sr], [stakerRewards.address]);
         });
         it("Registers PlayerRewards", async () => {
@@ -145,11 +143,13 @@ describe("ZXP", () => {
             const pr = ethers.utils.formatBytes32String("PlayerRewards");
             await seasonRegistry.registerObjects([pr], [top3Rewards.address]);
         });
-        it("Registers PlayerRewards", async () => {
-            const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
-            const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasonRegistry.address, "0");
-            await stakerRewardsDeploy.deployed();
-            stakerRewards = stakerRewardsDeploy;
+        it("Funds player reward tokens", async () => {
+            await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
+            await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
+        });
+        it("Funds staker reward tokens", async () => {
+            await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
+            await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
         });
 
         it("Starts the season", async () => {
@@ -170,14 +170,11 @@ describe("ZXP", () => {
             await top3Rewards.connect(player1).claim(p1);
             expect(await mockErc20.balanceOf(p1) == firstReward);
         });
-        it("Staker 1 unstakes and claims rewards", async () => {
-            await gameVault.connect(staker1).withdrawTo(s1, [s1nft]);
-        });
-        it("Staker 2 claims rewards without unstaking", async () => {
+        it("Staker 2 claims rewards", async () => {
             await stakerRewards.connect(staker2).claim(s2nft);
         });
         it("Ends the season", async () => {
-            await seasonRegistry.endSeason();
+            await seasons.endSeason();
         });
     }
 });

@@ -60,11 +60,8 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         address to,
         uint stakedAt
     ) external override only(GAME_VAULT) {
-        IStakerRewards(registry.addressOf(STAKER_REWARDS)).onUnstake(
-            id,
-            to,
-            stakedAt
-        );
+        IStakerRewards(seasons[currentSeason].objects.addressOf(STAKER_REWARDS))
+            .onUnstake(id, to, stakedAt);
         IXP(registry.addressOf(XP)).awardXP(
             to,
             stakerXPReward * (block.number - stakedAt)
