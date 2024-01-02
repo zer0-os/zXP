@@ -166,6 +166,9 @@ describe("ZXP", () => {
                 await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
         }
+        it("Staker 1 unstakes and claims rewards", async () => {
+            await gameVault.connect(staker1).withdrawTo(s1, [s1nft]);
+        });
         it("Player 1 claims season rewards", async () => {
             await top3Rewards.connect(player1).claim(p1);
             expect(await mockErc20.balanceOf(p1) == firstReward);

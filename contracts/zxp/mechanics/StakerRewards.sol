@@ -30,13 +30,14 @@ contract StakerRewards is ObjectRegistryClient, IStakerRewards {
         IERC721 nft,
         IGameVault vault,
         IObjectRegistry registry,
-        ISeasons seasons,
+        ISeasons seasonRegistry,
         uint season
     ) ObjectRegistryClient(registry) {
         rewardToken = erc20RewardToken;
         rewardPerBlock = tokenRewardPerBlock;
         underlyingToken = nft;
         underlyingVault = vault;
+        seasons = seasonRegistry;
     }
 
     function onUnstake(
