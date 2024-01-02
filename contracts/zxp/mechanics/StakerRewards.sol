@@ -29,10 +29,14 @@ contract StakerRewards is ObjectRegistryClient, IStakerRewards {
         uint tokenRewardPerBlock,
         IERC721 nft,
         IGameVault vault,
-        IObjectRegistry registry,
-        ISeasons seasonRegistry,
-        uint season
-    ) ObjectRegistryClient(registry) {
+        ISeasons seasonRegistry
+    )
+        ObjectRegistryClient(
+            IObjectRegistry(
+                seasonRegistry.getObjectsAddress(seasonRegistry.currentSeason())
+            )
+        )
+    {
         rewardToken = erc20RewardToken;
         rewardPerBlock = tokenRewardPerBlock;
         underlyingToken = nft;

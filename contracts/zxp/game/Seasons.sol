@@ -28,12 +28,15 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         _;
     }
 
-    constructor(
-        IObjectRegistry registry,
-        bytes32 game
-    ) ObjectRegistryClient(registry) {
+    constructor(IObjectRegistry registry) ObjectRegistryClient(registry) {
         Ownable(msg.sender);
         seasons[currentSeason].objects = new ObjectRegistry(msg.sender);
+    }
+
+    function getObjectsAddress(
+        uint season
+    ) external view override returns (address) {
+        return address(seasons[season].objects);
     }
 
     function startSeason()

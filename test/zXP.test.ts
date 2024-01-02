@@ -64,7 +64,7 @@ describe("ZXP", () => {
         gameRegistry = await ObjectRegistryFactory.attach(gameObjects);
 
         const seasonFactory = await hre.ethers.getContractFactory("Seasons");
-        const seasonDeploy = await seasonFactory.deploy(gameRegistry.address, gameName);
+        const seasonDeploy = await seasonFactory.deploy(gameRegistry.address);
         await seasonDeploy.deployed();
         seasons = seasonDeploy;
 
@@ -126,7 +126,7 @@ describe("ZXP", () => {
         });
         it("Registers StakerRewards", async () => {
             const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
-            const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasonRegistry.address, seasons.address, i);
+            const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasons.address);
             await stakerRewardsDeploy.deployed();
             stakerRewards = stakerRewardsDeploy;
 
