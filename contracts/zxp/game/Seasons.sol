@@ -70,4 +70,8 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
             stakerXPReward * (block.number - stakedAt)
         );
     }
+
+    function awardXP(address to, uint amount) public override {
+        IXP(seasons[currentSeason].objects.addressOf(XP)).awardXP(to, amount);
+    }
 }

@@ -7,21 +7,29 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IPlayerRewards} from "./interfaces/IPlayerRewards.sol";
 import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
 import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
+import {ISeasons} from "../game/interfaces/ISeasons.sol";
 
 contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
     IERC20 public rewardToken;
     uint public xpReward;
+    ISeasons private season;
     mapping(address awardee => uint amount) public rewards;
 
     constructor(
         address owner,
         IERC20 erc20RewardToken,
-        IObjectRegistry registry,
-        uint season,
+        ISeasons seasonManager,
         uint xpRewarded
-    ) ObjectRegistryClient(registry) {
+    )
+        ObjectRegistryClient(
+            IObjectRegistry(
+                seasonManager.getObjectsAddress(seasonManager.currentSeason())
+            )
+        )
+    {
         rewardToken = erc20RewardToken;
         xpReward = xpRewarded;
+        season = seasonManager;
         Ownable(owner);
     }
 
@@ -40,5 +48,8 @@ contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
         rewards[first] += firstReward;
         rewards[second] += secondReward;
         rewards[third] += thirdReward;
+        season.awardXP(first, xpReward * 3);
+        season.awardXP(second, xpReward * 2);
+        season.awardXP(third, xpReward);
     }
 }

@@ -10,6 +10,8 @@ interface ISeasons {
 
     function onUnstake(uint id, address to, uint blocks) external;
 
+    function awardXP(address to, uint amount) external;
+
     function getObjectsAddress(uint season) external view returns (address);
 
     function currentSeason() external view returns (uint);

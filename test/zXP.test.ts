@@ -1,5 +1,5 @@
 import * as hre from "hardhat";
-import { ethers, Contract } from "ethers";
+import { ethers, Contract, BigNumber } from "ethers";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -14,6 +14,9 @@ describe("ZXP", () => {
     let p1: string;
     let p2: string;
     let p3: string;
+    let p1bal: number;
+    let p2bal: number;
+    let p3bal: number;
     let s1: string;
     let s2: string;
     let staker1: SignerWithAddress;
@@ -32,6 +35,10 @@ describe("ZXP", () => {
     let firstReward: string;
     let secondReward: string;
     let thirdReward: string;
+    let playerXPReward: number;
+    let previousP1Bal: BigNumber;
+    let previousP2Bal: BigNumber;
+    let previousP3Bal: BigNumber;
     let gameName: string;
     let s1nft = 1;
     let s2nft = 2;
@@ -39,6 +46,12 @@ describe("ZXP", () => {
 
     before(async () => {
         [deployer, official, player1, player2, player3, staker1, staker2] = await hre.ethers.getSigners();
+
+        previousP1Bal = BigNumber.from("0");
+        previousP2Bal = BigNumber.from("0");
+        previousP3Bal = BigNumber.from("0");
+
+        playerXPReward = 100;
 
         const erc20Contracts = await hre.ethers.getContractFactory("MockERC20");
         const erc20 = await erc20Contracts.deploy("zToken", "WILD");
@@ -97,7 +110,7 @@ describe("ZXP", () => {
         const xpBytes = ethers.utils.formatBytes32String("XP");
         await gameRegistry.registerObjects([xpBytes], [xp.address]);
     });
-    it("Registers SeasonRegistry", async () => {
+    it("Registers Seasons", async () => {
         const sr = ethers.utils.formatBytes32String("Seasons");
         await gameRegistry.registerObjects([sr], [seasons.address]);
     });
@@ -119,7 +132,7 @@ describe("ZXP", () => {
             await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, gameVault.address, s2nft);
         });
         it("Gets season registry", async () => {
-            const storedSeason = await seasons.seasons(i);
+            const storedSeason = await seasons.seasons(await seasons.currentSeason());
             const storedRegistry = storedSeason.objects;
             const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");
             seasonRegistry = await ObjectRegistryFactory.attach(storedRegistry);
@@ -136,7 +149,7 @@ describe("ZXP", () => {
         });
         it("Registers PlayerRewards", async () => {
             const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
-            const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasonRegistry.address, "0", "100");
+            const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasons.address, "0", playerXPReward.toString());
             await top3deploy.deployed();
             top3Rewards = top3deploy;
 
@@ -163,7 +176,25 @@ describe("ZXP", () => {
                 firstReward = "1000000000000000000000";
                 secondReward = "100000000000000000000";
                 thirdReward = "10000000000000000000";
+                previousP1Bal = hre.ethers.BigNumber.from(p1bal);
+                previousP2Bal = hre.ethers.BigNumber.from(p2bal);
+                previousP3Bal = hre.ethers.BigNumber.from(p3bal);
                 await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
+            });
+            it("Awarded xp to winners", async () => {
+                let reward1 = BigNumber.from(playerXPReward * 3);
+                let reward2 = BigNumber.from(playerXPReward * 2);
+                let reward3 = BigNumber.from(playerXPReward);
+                let newP1Bal = previousP1Bal.add(reward1);
+                let newP2Bal = previousP2Bal.add(reward2);
+                let newP3Bal = previousP3Bal.add(reward3);
+
+                expect(await xp.balanceOf(p1)).to.equal(newP1Bal);
+                expect(await xp.balanceOf(p2)).to.equal(newP2Bal);
+                expect(await xp.balanceOf(p3)).to.equal(newP3Bal);
+            });
+            it("Levels up", async () => {
+                console.log(await xp.getXPForLevel(i));
             });
         }
         it("Staker 1 unstakes and claims rewards", async () => {
