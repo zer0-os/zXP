@@ -14,9 +14,6 @@ describe("ZXP", () => {
     let p1: string;
     let p2: string;
     let p3: string;
-    let p1bal: number;
-    let p2bal: number;
-    let p3bal: number;
     let s1: string;
     let s2: string;
     let staker1: SignerWithAddress;
@@ -111,8 +108,8 @@ describe("ZXP", () => {
         await gameRegistry.registerObjects([xpBytes], [xp.address]);
     });
     it("Registers Seasons", async () => {
-        const sr = ethers.utils.formatBytes32String("Seasons");
-        await gameRegistry.registerObjects([sr], [seasons.address]);
+        const seasonBytes = ethers.utils.formatBytes32String("Seasons");
+        await gameRegistry.registerObjects([seasonBytes], [seasons.address]);
     });
 
     const numSeasons = 3
@@ -149,7 +146,7 @@ describe("ZXP", () => {
         });
         it("Registers PlayerRewards", async () => {
             const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
-            const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasons.address, "0", playerXPReward.toString());
+            const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasons.address, playerXPReward.toString());
             await top3deploy.deployed();
             top3Rewards = top3deploy;
 
@@ -176,9 +173,6 @@ describe("ZXP", () => {
                 firstReward = "1000000000000000000000";
                 secondReward = "100000000000000000000";
                 thirdReward = "10000000000000000000";
-                previousP1Bal = hre.ethers.BigNumber.from(p1bal);
-                previousP2Bal = hre.ethers.BigNumber.from(p2bal);
-                previousP3Bal = hre.ethers.BigNumber.from(p3bal);
                 await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
             it("Awarded xp to winners", async () => {
@@ -192,6 +186,10 @@ describe("ZXP", () => {
                 expect(await xp.balanceOf(p1)).to.equal(newP1Bal);
                 expect(await xp.balanceOf(p2)).to.equal(newP2Bal);
                 expect(await xp.balanceOf(p3)).to.equal(newP3Bal);
+
+                previousP1Bal = newP1Bal;
+                previousP2Bal = newP2Bal;
+                previousP3Bal = newP3Bal;
             });
             it("Levels up", async () => {
                 console.log(await xp.getXPForLevel(i));
