@@ -106,6 +106,7 @@ describe("ZXP", () => {
     it("Registers XP", async () => {
         const xpBytes = ethers.utils.formatBytes32String("XP");
         await gameRegistry.registerObjects([xpBytes], [xp.address]);
+        expect(await gameRegistry.addressOf(xpBytes)).to.equal(xp.address)
     });
     it("Registers Seasons", async () => {
         const seasonBytes = ethers.utils.formatBytes32String("Seasons");
@@ -176,6 +177,9 @@ describe("ZXP", () => {
                 await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
             it("Awarded xp to winners", async () => {
+                const xpBytes = ethers.utils.formatBytes32String("XP");
+                console.log(await gameRegistry.addressOf(xpBytes));
+                console.log(await seasons.test());
                 let reward1 = BigNumber.from(playerXPReward * 3);
                 let reward2 = BigNumber.from(playerXPReward * 2);
                 let reward3 = BigNumber.from(playerXPReward);

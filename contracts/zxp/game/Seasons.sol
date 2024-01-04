@@ -71,7 +71,13 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         );
     }
 
+    function test() public view override returns (address) {
+        return IObjectRegistry(seasons[currentSeason].objects).addressOf(XP);
+    }
+
     function awardXP(address to, uint amount) public override {
-        IXP(seasons[currentSeason].objects.addressOf(XP)).awardXP(to, amount);
+        ///@todo finish access control
+        IXP(IObjectRegistry(seasons[currentSeason].objects).addressOf(XP))
+            .awardXP(to, amount);
     }
 }

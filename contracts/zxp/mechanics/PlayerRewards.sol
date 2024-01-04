@@ -17,7 +17,6 @@ contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
 
     constructor(
         address owner,
-        IERC20 erc20XPToken,
         IERC20 erc20RewardToken,
         ISeasons seasonManager,
         uint xpRewarded
@@ -29,7 +28,6 @@ contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
         )
     {
         rewardToken = erc20RewardToken;
-        xpToken = erc20XPToken;
         xpReward = xpRewarded;
         season = seasonManager;
         Ownable(owner);
@@ -50,8 +48,8 @@ contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
         rewards[first] += firstReward;
         rewards[second] += secondReward;
         rewards[third] += thirdReward;
-        xpToken.transfer(first, xpReward * 3);
-        xpToken.transfer(second, xpReward * 2);
-        xpToken.transfer(third, xpReward);
+        season.awardXP(first, xpReward * 3);
+        season.awardXP(second, xpReward * 2);
+        season.awardXP(third, xpReward);
     }
 }
