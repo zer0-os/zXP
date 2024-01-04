@@ -15,6 +15,4 @@ interface ISeasons {
     function getObjectsAddress(uint season) external view returns (address);
 
     function currentSeason() external view returns (uint);
-
-    function test() external view returns (address);
 }

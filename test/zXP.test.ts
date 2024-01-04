@@ -178,8 +178,6 @@ describe("ZXP", () => {
             });
             it("Awarded xp to winners", async () => {
                 const xpBytes = ethers.utils.formatBytes32String("XP");
-                console.log(await gameRegistry.addressOf(xpBytes));
-                console.log(await seasons.test());
                 let reward1 = BigNumber.from(playerXPReward * 3);
                 let reward2 = BigNumber.from(playerXPReward * 2);
                 let reward3 = BigNumber.from(playerXPReward);
