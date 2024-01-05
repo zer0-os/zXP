@@ -33,7 +33,9 @@ contract StakerRewards is ObjectRegistryClient, IStakerRewards {
     )
         ObjectRegistryClient(
             IObjectRegistry(
-                seasonRegistry.getObjectsAddress(seasonRegistry.currentSeason())
+                seasonRegistry.getRegistryAddress(
+                    seasonRegistry.currentSeason()
+                )
             )
         )
     {

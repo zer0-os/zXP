@@ -10,6 +10,7 @@ import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
 import {ISeasons} from "../game/interfaces/ISeasons.sol";
 
 contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
+    bytes32 internal constant name = "PlayerRewards";
     IERC20 public rewardToken;
     uint public xpReward;
     ISeasons private season;
@@ -23,7 +24,7 @@ contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
     )
         ObjectRegistryClient(
             IObjectRegistry(
-                seasonManager.getObjectsAddress(seasonManager.currentSeason())
+                seasonManager.getRegistryAddress(seasonManager.currentSeason())
             )
         )
     {
@@ -48,8 +49,8 @@ contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
         rewards[first] += firstReward;
         rewards[second] += secondReward;
         rewards[third] += thirdReward;
-        season.awardXP(first, xpReward * 3);
-        season.awardXP(second, xpReward * 2);
-        season.awardXP(third, xpReward);
+        season.awardXP(first, xpReward * 3, name);
+        season.awardXP(second, xpReward * 2, name);
+        season.awardXP(third, xpReward, name);
     }
 }
