@@ -12,7 +12,7 @@ interface ISeasons {
 
     function awardXP(address to, uint amount) external;
 
-    function getObjectsAddress(uint season) external view returns (address);
+    function getRegistryAddress(uint season) external view returns (address);
 
     function currentSeason() external view returns (uint);
 }

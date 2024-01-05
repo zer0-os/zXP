@@ -28,12 +28,20 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         _;
     }
 
+    modifier onlyObject(address object) {
+        require(
+            address(seasons[currentSeason].objects[object]) != address(0),
+            "ZXP: Object not registered"
+        );
+        _;
+    }
+
     constructor(IObjectRegistry registry) ObjectRegistryClient(registry) {
         Ownable(msg.sender);
         seasons[currentSeason].objects = new ObjectRegistry(msg.sender);
     }
 
-    function getObjectsAddress(
+    function getRegistryAddress(
         uint season
     ) external view override returns (address) {
         return address(seasons[season].objects);
@@ -71,8 +79,7 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         );
     }
 
-    function awardXP(address to, uint amount) public override {
-        ///@todo finish access control
+    function awardXP(address to, uint amount) public override onlyObject {
         IXP(registry.addressOf(XP)).awardXP(to, amount);
     }
 }
