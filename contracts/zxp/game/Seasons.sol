@@ -81,7 +81,7 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         );
     }
 
-    function awardXP(address to, uint amount) public override onlyObject {
+    function awardXP(address to, uint amount) public override onlyRegistered {
         IXP(registry.addressOf(XP)).awardXP(to, amount);
     }
 }
