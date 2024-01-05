@@ -28,9 +28,11 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         _;
     }
 
-    modifier onlyObject(address object) {
+    modifier onlyRegistered(address object) {
         require(
-            address(seasons[currentSeason].objects[object]) != address(0),
+            address(
+                ObjectRegistry(seasons[currentSeason].objects.addressOf(object))
+            ) != address(0),
             "ZXP: Object not registered"
         );
         _;
