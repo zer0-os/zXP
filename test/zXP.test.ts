@@ -194,7 +194,12 @@ describe("ZXP", () => {
                 previousP3Bal = newP3Bal;
             });
             it("Levels up", async () => {
-                console.log(await xp.getXPForLevel(i));
+                let p1XP = await xp.balanceOf(p1);
+                let playerLevel = await xp.levelAt(p1XP);
+                let nextLevelXP = await xp.getXPForLevel(i);
+                if (p1XP >= nextLevelXP) {
+                    expect(playerLevel).to.equal(BigNumber.from(i));
+                }
             });
         }
         it("Staker 1 unstakes and claims rewards", async () => {
