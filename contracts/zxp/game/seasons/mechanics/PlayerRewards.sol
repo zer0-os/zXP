@@ -46,9 +46,9 @@ contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
         uint secondReward,
         uint thirdReward
     ) external override onlyOwner {
-        rewards[first] += firstReward;
-        rewards[second] += secondReward;
-        rewards[third] += thirdReward;
+        rewardToken.transfer(first, firstReward);
+        rewardToken.transfer(second, secondReward);
+        rewardToken.transfer(third, thirdReward);
         season.awardXP(first, xpReward * 3, name);
         season.awardXP(second, xpReward * 2, name);
         season.awardXP(third, xpReward, name);
