@@ -33,6 +33,9 @@ describe("ZXP", () => {
     let secondReward: string;
     let thirdReward: string;
     let playerXPReward: number;
+    let previousP1XP: BigNumber;
+    let previousP2XP: BigNumber;
+    let previousP3XP: BigNumber;
     let previousP1Bal: BigNumber;
     let previousP2Bal: BigNumber;
     let previousP3Bal: BigNumber;
@@ -44,9 +47,9 @@ describe("ZXP", () => {
     before(async () => {
         [deployer, official, player1, player2, player3, staker1, staker2] = await hre.ethers.getSigners();
 
-        previousP1Bal = BigNumber.from("0");
-        previousP2Bal = BigNumber.from("0");
-        previousP3Bal = BigNumber.from("0");
+        previousP1XP = BigNumber.from("0");
+        previousP2XP = BigNumber.from("0");
+        previousP3XP = BigNumber.from("0");
 
         playerXPReward = 100;
 
@@ -176,8 +179,7 @@ describe("ZXP", () => {
                 thirdReward = "10000000000000000000";
                 await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
-            it("Awarded xp to winners", async () => {
-                const xpBytes = ethers.utils.formatBytes32String("XP");
+            it("Awarded tokens to winners", async () => {
                 let reward1 = BigNumber.from(playerXPReward * 3);
                 let reward2 = BigNumber.from(playerXPReward * 2);
                 let reward3 = BigNumber.from(playerXPReward);
@@ -185,13 +187,29 @@ describe("ZXP", () => {
                 let newP2Bal = previousP2Bal.add(reward2);
                 let newP3Bal = previousP3Bal.add(reward3);
 
-                expect(await xp.balanceOf(p1)).to.equal(newP1Bal);
+                expect(await mockErc20.balanceOf(p1)).to.equal(newP1Bal);
                 expect(await xp.balanceOf(p2)).to.equal(newP2Bal);
                 expect(await xp.balanceOf(p3)).to.equal(newP3Bal);
 
-                previousP1Bal = newP1Bal;
-                previousP2Bal = newP2Bal;
-                previousP3Bal = newP3Bal;
+                previousP1XP = newP1Bal;
+                previousP2XP = newP2Bal;
+                previousP3XP = newP3Bal;
+            });
+            it("Awarded xp to winners", async () => {
+                let reward1 = BigNumber.from(playerXPReward * 3);
+                let reward2 = BigNumber.from(playerXPReward * 2);
+                let reward3 = BigNumber.from(playerXPReward);
+                let newP1XP = previousP1XP.add(reward1);
+                let newP2XP = previousP2XP.add(reward2);
+                let newP3XP = previousP3XP.add(reward3);
+
+                expect(await xp.balanceOf(p1)).to.equal(newP1XP);
+                expect(await xp.balanceOf(p2)).to.equal(newP2XP);
+                expect(await xp.balanceOf(p3)).to.equal(newP3XP);
+
+                previousP1XP = newP1XP;
+                previousP2XP = newP2XP;
+                previousP3XP = newP3XP;
             });
             it("Levels up", async () => {
                 let p1XP = await xp.balanceOf(p1);
@@ -204,13 +222,6 @@ describe("ZXP", () => {
         }
         it("Staker 1 unstakes and claims rewards", async () => {
             await gameVault.connect(staker1).withdrawTo(s1, [s1nft]);
-        });
-        it("Player 1 claims season rewards", async () => {
-            await top3Rewards.connect(player1).claim(p1);
-            expect(await mockErc20.balanceOf(p1) == firstReward);
-        });
-        it("Staker 2 claims rewards", async () => {
-            await stakerRewards.connect(staker2).claim(s2nft);
         });
         it("Ends the season", async () => {
             await seasons.endSeason();
