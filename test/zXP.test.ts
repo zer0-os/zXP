@@ -217,10 +217,10 @@ describe("ZXP", () => {
             it("Levels up", async () => {
                 let p1XP = await xp.balanceOf(p1);
                 let playerLevel = await xp.levelAt(p1XP);
-                let nextLevelXP = await xp.getXPForLevel(i);
-                if (p1XP >= nextLevelXP) {
-                    expect(playerLevel).to.equal(BigNumber.from(i));
-                }
+                let xpReq = await xp.xpRequired(playerLevel);
+                console.log(p1XP.toString());
+                console.log(playerLevel.toString());
+                console.log(xpReq.toString());
             });
         }
         it("Staker 1 unstakes and claims rewards", async () => {

@@ -3,10 +3,11 @@ pragma solidity ^0.8.19;
 
 import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
 import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
+import {QuadraticLevelCurve} from "./QuadraticLevelCurve.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IXP} from "./interfaces/IXP.sol";
 
-contract XP is ERC20, ObjectRegistryClient, IXP {
+contract XP is ObjectRegistryClient, QuadraticLevelCurve, ERC20, IXP {
     bytes32 internal constant SEASONS = "Seasons";
 
     constructor(
@@ -27,11 +28,5 @@ contract XP is ERC20, ObjectRegistryClient, IXP {
 
     function awardXP(address to, uint amount) external override only(SEASONS) {
         _mint(to, amount);
-    }
-
-    function getXPForLevel(
-        uint256 level
-    ) public pure override returns (uint256) {
-        return 100 * level * level;
     }
 }
