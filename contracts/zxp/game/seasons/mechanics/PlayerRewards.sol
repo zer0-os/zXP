@@ -5,9 +5,9 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IPlayerRewards} from "./interfaces/IPlayerRewards.sol";
-import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
-import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
-import {ISeasons} from "../game/interfaces/ISeasons.sol";
+import {ObjectRegistryClient} from "../../../ObjectRegistryClient.sol";
+import {IObjectRegistry} from "../../../interfaces/IObjectRegistry.sol";
+import {ISeasons} from "../../interfaces/ISeasons.sol";
 
 contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
     bytes32 internal constant name = "PlayerRewards";

@@ -50,6 +50,9 @@ describe("ZXP", () => {
         previousP1XP = BigNumber.from("0");
         previousP2XP = BigNumber.from("0");
         previousP3XP = BigNumber.from("0");
+        previousP1Bal = BigNumber.from("0");
+        previousP2Bal = BigNumber.from("0");
+        previousP3Bal = BigNumber.from("0");
 
         playerXPReward = 100;
 
@@ -180,20 +183,20 @@ describe("ZXP", () => {
                 await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
             it("Awarded tokens to winners", async () => {
-                let reward1 = BigNumber.from(playerXPReward * 3);
-                let reward2 = BigNumber.from(playerXPReward * 2);
-                let reward3 = BigNumber.from(playerXPReward);
+                let reward1 = BigNumber.from(firstReward);
+                let reward2 = BigNumber.from(secondReward);
+                let reward3 = BigNumber.from(thirdReward);
                 let newP1Bal = previousP1Bal.add(reward1);
                 let newP2Bal = previousP2Bal.add(reward2);
                 let newP3Bal = previousP3Bal.add(reward3);
 
                 expect(await mockErc20.balanceOf(p1)).to.equal(newP1Bal);
-                expect(await xp.balanceOf(p2)).to.equal(newP2Bal);
-                expect(await xp.balanceOf(p3)).to.equal(newP3Bal);
+                expect(await mockErc20.balanceOf(p2)).to.equal(newP2Bal);
+                expect(await mockErc20.balanceOf(p3)).to.equal(newP3Bal);
 
-                previousP1XP = newP1Bal;
-                previousP2XP = newP2Bal;
-                previousP3XP = newP3Bal;
+                previousP1Bal = newP1Bal;
+                previousP2Bal = newP2Bal;
+                previousP3Bal = newP3Bal;
             });
             it("Awarded xp to winners", async () => {
                 let reward1 = BigNumber.from(playerXPReward * 3);

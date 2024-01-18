@@ -4,10 +4,10 @@ pragma solidity ^0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IStakerRewards} from "./interfaces/IStakerRewards.sol";
-import {IGameVault} from "../game/interfaces/IGameVault.sol";
-import {ISeasons} from "../game/interfaces/ISeasons.sol";
-import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
-import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
+import {IGameVault} from "../../interfaces/IGameVault.sol";
+import {ISeasons} from "../../interfaces/ISeasons.sol";
+import {ObjectRegistryClient} from "../../../ObjectRegistryClient.sol";
+import {IObjectRegistry} from "../../../interfaces/IObjectRegistry.sol";
 
 contract StakerRewards is ObjectRegistryClient, IStakerRewards {
     IERC20 public rewardToken;

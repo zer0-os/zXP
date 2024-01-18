@@ -2,11 +2,11 @@
 pragma solidity ^0.8.19;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ISeasons} from "./interfaces/ISeasons.sol";
-import {ObjectRegistry, IObjectRegistry} from "../ObjectRegistry.sol";
-import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
-import {IStakerRewards} from "../mechanics/interfaces/IStakerRewards.sol";
-import {IXP} from "./interfaces/IXP.sol";
+import {ISeasons} from "../interfaces/ISeasons.sol";
+import {ObjectRegistry, IObjectRegistry} from "../../ObjectRegistry.sol";
+import {ObjectRegistryClient} from "../../ObjectRegistryClient.sol";
+import {IStakerRewards} from "./mechanics/interfaces/IStakerRewards.sol";
+import {IXP} from "../interfaces/IXP.sol";
 
 contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
     bytes32 internal constant GAME_VAULT = "GameVault";
