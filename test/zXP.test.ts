@@ -56,11 +56,11 @@ describe("ZXP", () => {
 
         playerXPReward = 100;
 
+        console.log("got here");
         const erc20Contracts = await hre.ethers.getContractFactory("MockERC20");
         const erc20 = await erc20Contracts.deploy("zToken", "WILD");
         await erc20.deployed();
         mockErc20 = erc20;
-
         const erc721Contracts = await hre.ethers.getContractFactory("MockERC721");
         const erc721 = await erc721Contracts.deploy("zToken", "WILD", "");
         await erc721.deployed();
