@@ -77,7 +77,8 @@ const config: HardhatUserConfig = {
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL,
       timeout: 10000000,
-      chainId: 11155111
+      accounts: [process.env.PRIVATE_KEY!] //pub key 0x6BC8F26172E1bbd3139f951893d6d5d1b669375d
+      //chainId: 11155111
     },
     devnet: {
       // Add current URL that you spawned if not using automated spawning
