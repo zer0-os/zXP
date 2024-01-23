@@ -56,7 +56,6 @@ describe("ZXP", () => {
 
         playerXPReward = 100;
 
-        console.log("got here");
         const erc20Contracts = await hre.ethers.getContractFactory("MockERC20");
         const erc20 = await erc20Contracts.deploy("zToken", "WILD");
         await erc20.deployed();
