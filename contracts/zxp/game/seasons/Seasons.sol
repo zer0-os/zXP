@@ -28,11 +28,11 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         _;
     }
 
-    modifier onlyRegistered(bytes32 object) {
+    modifier onlyRegistered(address object, bytes32 name) {
         require(
             address(
-                ObjectRegistry(seasons[currentSeason].objects.addressOf(object))
-            ) != address(0),
+                ObjectRegistry(seasons[currentSeason].objects.addressOf(name))
+            ) == object,
             "ZXP: Object not registered"
         );
         _;
@@ -84,8 +84,8 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
     function awardXP(
         address to,
         uint amount,
-        bytes32 object
-    ) public override onlyRegistered(object) {
+        bytes32 objectName
+    ) public override onlyRegistered(msg.sender, objectName) {
         IXP(registry.addressOf(XP)).awardXP(to, amount);
     }
 }

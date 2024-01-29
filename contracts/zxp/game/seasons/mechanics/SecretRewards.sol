@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ISecretRewards} from "./interfaces/ISecretRewards.sol";
@@ -9,15 +8,15 @@ import {ObjectRegistryClient} from "../../../ObjectRegistryClient.sol";
 import {IObjectRegistry} from "../../../interfaces/IObjectRegistry.sol";
 import {ISeasons} from "../../interfaces/ISeasons.sol";
 
-contract SecretRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
-    bytes32 internal constant name = "SecretRewards";
-    IERC20 public rewardToken;
+contract SecretRewards is ObjectRegistryClient, ISecretRewards {
+    bytes32 internal constant OWNER = "Owner";
+    bytes32 internal constant OBJECT = "SecretRewards";
     uint public xpReward;
+    IERC20 public rewardToken;
     ISeasons private season;
-    mapping(address awardee => uint amount) public rewards;
+    mapping(address player => uint amount) public rewards;
 
     constructor(
-        address owner,
         IERC20 erc20RewardToken,
         ISeasons seasonManager,
         uint xpRewarded
@@ -31,79 +30,82 @@ contract SecretRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
         rewardToken = erc20RewardToken;
         xpReward = xpRewarded;
         season = seasonManager;
-        Ownable(owner);
     }
 
     struct Commitment {
-        bytes32 guessHash;
-        bool isRevealed;
+        bytes32 secretHash;
+        string reveal;
     }
 
-    mapping(address player => Commitment guess) public commitments;
-    bytes32 public secretHash; // The hash of the secret
-    bool public isGameActive;
-    uint256 public revealEndTime;
+    mapping(uint nonce => Commitment commit) public secrets;
+    mapping(address player => mapping(uint nonce => Commitment commit))
+        public guesses;
 
     // Events
-    event Commit(address indexed player);
-    event Reveal(address indexed player, string guess);
-    event GameResult(string result);
-
-    constructor(bytes32 _secretHash) {
-        secretHash = _secretHash;
-        isGameActive = true;
-    }
+    event SecretCommitted(uint nonce, bytes32 secret);
+    event SecretRevealed(uint nonce, string reveal);
+    event GuessCommitted(address indexed player, uint nonce, bytes32 secret);
+    event GuessRevealed(address indexed player, uint nonce, string reveal);
 
     // Players commit their hashed guess
-    function commitGuess(bytes32 _guessHash) public override {
-        require(isGameActive, "Game is not active");
-        require(commitments[msg.sender].guessHash == 0, "Already committed");
-
-        commitments[msg.sender] = Commitment({
-            guessHash: _guessHash,
-            isRevealed: false
+    function commitGuess(uint nonce, bytes32 guessHash) public override {
+        require(
+            bytes(secrets[nonce].reveal).length == 0,
+            "No overwrite after reveal"
+        );
+        guesses[msg.sender][nonce] = Commitment({
+            secretHash: guessHash,
+            reveal: ""
         });
-
-        emit Commit(msg.sender);
-    }
-
-    // Starts the reveal phase
-    function startRevealPhase(uint256 duration) public override {
-        // Add logic for who can start the reveal phase and when
-        revealEndTime = block.timestamp + duration;
+        emit GuessCommitted(msg.sender, nonce, guessHash);
     }
 
     // Players reveal their guess
-    function revealGuess(
-        string memory guess,
-        string memory nonce
-    ) public override {
-        require(block.timestamp < revealEndTime, "Reveal phase over");
+    function revealGuess(uint nonce, string memory guess) public override {
         require(
-            keccak256(abi.encodePacked(guess, nonce, msg.sender)) ==
-                commitments[msg.sender].guessHash,
+            hashCommit(msg.sender, nonce, guess) ==
+                guesses[msg.sender][nonce].secretHash,
             "Invalid reveal"
         );
+        require(
+            bytes(secrets[nonce].reveal).length != 0,
+            "Answer not revealed"
+        );
 
-        commitments[msg.sender].isRevealed = true;
-        emit Reveal(msg.sender, guess);
+        season.awardXP(msg.sender, xpReward, OBJECT);
 
-        // Add logic for checking the guess against the secret
+        emit GuessRevealed(msg.sender, nonce, guess);
     }
 
-    // Conclude the game
-    function concludeGame() public override {
-        require(block.timestamp >= revealEndTime, "Reveal phase not over");
-        // Add logic to determine the winner or outcome
-        isGameActive = false;
-        emit GameResult("Game concluded");
+    function commitSecret(
+        uint nonce,
+        bytes32 secretHash
+    ) public override only(OWNER) {
+        require(secrets[nonce].secretHash == bytes32(0), "No overwriting");
+        secrets[nonce] = Commitment({secretHash: secretHash, reveal: ""});
+        emit SecretCommitted(nonce, secretHash);
     }
 
-    // Utility function to hash player's guess with nonce and address
-    function hashGuess(
-        string memory guess,
-        string memory nonce
-    ) public view override returns (bytes32) {
-        return keccak256(abi.encodePacked(guess, nonce, msg.sender));
+    function revealSecret(
+        uint nonce,
+        string memory secret
+    ) public override only(OWNER) {
+        //bytes memory reveal = bytes()
+        require(
+            hashCommit(msg.sender, nonce, secret) == secrets[nonce].secretHash,
+            "Incorrect secret"
+        );
+        require(bytes(secrets[nonce].reveal).length == 0, "No overwriting");
+        secrets[nonce].reveal = secret;
+        emit SecretRevealed(nonce, secret);
+    }
+
+    // Helper function for hashing secret words
+    function hashCommit(
+        address player,
+        uint nonce,
+        string memory secret
+    ) public pure override returns (bytes32) {
+        return keccak256(abi.encode(player, nonce, secret));
     }
 }

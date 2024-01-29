@@ -2,16 +2,17 @@
 pragma solidity ^0.8.19;
 
 interface ISecretRewards {
-    function commitGuess(bytes32 _guessHash) external;
+    function commitGuess(uint nonce, bytes32 _guessHash) external;
 
-    function startRevealPhase(uint256 duration) external;
+    function revealGuess(uint nonce, string memory guess) external;
 
-    function revealGuess(string memory guess, string memory nonce) external;
+    function commitSecret(uint nonce, bytes32 _secretHash) external;
 
-    function concludeGame() external;
+    function revealSecret(uint nonce, string memory secret) external;
 
-    function hashGuess(
-        string memory guess,
-        string memory nonce
+    function hashCommit(
+        address player,
+        uint nonce,
+        string memory secret
     ) external view returns (bytes32);
 }
