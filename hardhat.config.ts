@@ -36,26 +36,6 @@ const config: HardhatUserConfig = {
         },
       },
     ],
-    overrides: {
-      "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol": {
-        version: "0.8.9",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-      "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol": {
-        version: "0.8.9",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-    },
   },
   paths: {
     sources: "./contracts",
@@ -77,7 +57,7 @@ const config: HardhatUserConfig = {
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL,
       timeout: 10000000,
-      accounts: [process.env.PRIVATE_KEY!] //pub key 0x6BC8F26172E1bbd3139f951893d6d5d1b669375d
+      accounts: [process.env.PRIVATE_KEY1!, process.env.PRIVATE_KEY2!, process.env.PRIVATE_KEY3!, process.env.PRIVATE_KEY4!, process.env.PRIVATE_KEY5!, process.env.PRIVATE_KEY6!, process.env.PRIVATE_KEY7!, process.env.PRIVATE_KEY8!, process.env.PRIVATE_KEY9!] //pub key 0x6BC8F26172E1bbd3139f951893d6d5d1b669375d
       //chainId: 11155111
     },
     devnet: {
@@ -98,11 +78,7 @@ const config: HardhatUserConfig = {
     templates: "docs/docgen-templates",
     outputDir: "docs/contracts",
     exclude: [
-      "upgrade-test-mocks/",
-      "upgradeMocks/",
-      "token/mocks/",
-      "utils/",
-      "oz-proxies/",
+      "tokens"
     ],
   },
 };

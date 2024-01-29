@@ -1,5 +1,5 @@
 import * as hre from "hardhat";
-import { ethers, Contract, BigNumber } from "ethers";
+import { ethers, Contract, BigNumber, providers } from "ethers";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -165,6 +165,17 @@ describe("ZXP", () => {
             const secretsDeploy = await secretsFactory.deploy(mockErc20.address, seasons.address, "121");
             await secretsDeploy.deployed();
             secretRewards = secretsDeploy;
+
+            try {
+                await hre.run("verify:verify", {
+                    address: secretRewards.address,
+                    constructorArguments: [
+                        mockErc20.address,
+                        seasons.address,
+                        "121"
+                    ],
+                })
+            } catch (error) { console.log(error) };
 
             const sr = ethers.utils.formatBytes32String("SecretRewards");
             await seasonRegistry.registerObjects([sr], [secretRewards.address]);
