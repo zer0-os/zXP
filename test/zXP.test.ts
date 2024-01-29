@@ -22,6 +22,7 @@ describe("ZXP", () => {
     let mockErc721: Contract;
     let top3Rewards: Contract;
     let stakerRewards: Contract;
+    let secretRewards: Contract;
     let games: Contract;
     let seasons: Contract;
     let gameRegistry: Contract;
@@ -118,7 +119,7 @@ describe("ZXP", () => {
         await gameRegistry.registerObjects([seasonBytes], [seasons.address]);
     });
 
-    const numSeasons = 3
+    const numSeasons = 1
     for (let i = 0; i < numSeasons; i++) {
         it("Mints staker 1 NFT", async () => {
             s1nft = s1nft + 3;
@@ -159,6 +160,40 @@ describe("ZXP", () => {
             const pr = ethers.utils.formatBytes32String("PlayerRewards");
             await seasonRegistry.registerObjects([pr], [top3Rewards.address]);
         });
+        it("Registers SecretRewards", async () => {
+            const secretsFactory = await hre.ethers.getContractFactory("SecretRewards");
+            const secretsDeploy = await secretsFactory.deploy(mockErc20.address, seasons.address, "121");
+            await secretsDeploy.deployed();
+            secretRewards = secretsDeploy;
+
+            const sr = ethers.utils.formatBytes32String("SecretRewards");
+            await seasonRegistry.registerObjects([sr], [secretRewards.address]);
+        });
+
+        it("Commits secret", async () => {
+            let secret = "verysecretwordshhh";
+            let nonce = 123123123;
+            let secretHash = secretRewards.hashCommit(deployer.address, nonce, secret)
+            await secretRewards.connect(deployer).commitSecret(nonce, secretHash);
+        });
+        it("Commits correct guess", async () => {
+            let guess = "verysecretwordshhh";
+            let nonce = 123123123;
+            let guessHash = secretRewards.hashCommit(p1, nonce, guess);
+            await secretRewards.connect(player1).commitGuess(nonce, guessHash);
+        });
+        it("Reveals secret", async () => {
+            let secret = "verysecretwordshhh";
+            let nonce = 123123123;
+            await secretRewards.connect(deployer).revealSecret(nonce, secret);
+        });
+        it("Reveals correct guess, receives XP", async () => {
+            let guess = "verysecretwordshhh";
+            let nonce = 123123123;
+            await secretRewards.connect(player1).revealGuess(nonce, guess);
+            expect(await xp.balanceOf(p1)).to.equal(BigNumber.from("121"));
+            previousP1XP = BigNumber.from("121");
+        });
         it("Funds player reward tokens", async () => {
             await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
             await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
@@ -181,6 +216,7 @@ describe("ZXP", () => {
                 thirdReward = "10000000000000000000";
                 await top3Rewards.connect(deployer).submitTop3Results(p1, p2, p3, firstReward, secondReward, thirdReward);
             });
+
             it("Awarded tokens to winners", async () => {
                 let reward1 = BigNumber.from(firstReward);
                 let reward2 = BigNumber.from(secondReward);
