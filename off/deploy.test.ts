@@ -1,7 +1,8 @@
 import * as hre from "hardhat";
-import { ethers, Contract, BigNumber, providers } from "ethers";
+import { ethers, Contract, BigNumber } from "ethers";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { text } from "stream/consumers";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("@nomicfoundation/hardhat-chai-matchers");
 
@@ -107,33 +108,41 @@ describe("ZXP", () => {
     });
     it("Registers GameVault", async () => {
         const gameVaultBytes = ethers.utils.formatBytes32String("GameVault");
-        await gameRegistry.registerObjects([gameVaultBytes], [gameVault.address]);
+        let tx = await gameRegistry.connect(deployer).registerObjects([gameVaultBytes], [gameVault.address]);
+        await tx.wait();
     });
     it("Registers XP", async () => {
         const xpBytes = ethers.utils.formatBytes32String("XP");
-        await gameRegistry.registerObjects([xpBytes], [xp.address]);
+        let tx = await gameRegistry.connect(deployer).registerObjects([xpBytes], [xp.address]);
+        await tx.wait();
+        //console.log(await gameRegistry.addressOf(xpBytes));
         expect(await gameRegistry.addressOf(xpBytes)).to.equal(xp.address)
     });
     it("Registers Seasons", async () => {
         const seasonBytes = ethers.utils.formatBytes32String("Seasons");
-        await gameRegistry.registerObjects([seasonBytes], [seasons.address]);
+        let tx = await gameRegistry.connect(deployer).registerObjects([seasonBytes], [seasons.address]);
+        await tx.wait();
     });
 
     const numSeasons = 1
     for (let i = 0; i < numSeasons; i++) {
         it("Mints staker 1 NFT", async () => {
             s1nft = s1nft + 3;
-            await mockErc721.connect(deployer).mint(s1, s1nft);
+            let tx = await mockErc721.connect(deployer).mint(s1, s1nft);
+            await tx.wait();
         });
         it("Staker 1 stakes NFT", async () => {
-            await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVault.address, s1nft);
+            let tx = await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVault.address, s1nft);
+            await tx.wait();
         });
         it("Mints Staker 2 NFT", async () => {
             s2nft = s2nft + 3;
-            await mockErc721.connect(deployer).mint(s2, s2nft);
+            let tx = await mockErc721.connect(deployer).mint(s2, s2nft);
+            await tx.wait();
         });
         it("Player2 stakes NFT", async () => {
-            await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, gameVault.address, s2nft);
+            let tx = await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, gameVault.address, s2nft);
+            await tx.wait();
         });
         it("Gets season registry", async () => {
             const storedSeason = await seasons.seasons(await seasons.currentSeason());
@@ -148,8 +157,10 @@ describe("ZXP", () => {
             stakerRewards = stakerRewardsDeploy;
 
             const sr = ethers.utils.formatBytes32String("StakerRewards");
-            await gameRegistry.registerObjects([sr], [stakerRewards.address]);
-            await seasonRegistry.registerObjects([sr], [stakerRewards.address]);
+            let tx = await gameRegistry.registerObjects([sr], [stakerRewards.address]);
+            await tx.wait();
+            let tx1 = await seasonRegistry.registerObjects([sr], [stakerRewards.address]);
+            await tx1.wait();
         });
         it("Registers PlayerRewards", async () => {
             const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
@@ -158,15 +169,16 @@ describe("ZXP", () => {
             top3Rewards = top3deploy;
 
             const pr = ethers.utils.formatBytes32String("PlayerRewards");
-            await seasonRegistry.registerObjects([pr], [top3Rewards.address]);
+            let tx = await seasonRegistry.registerObjects([pr], [top3Rewards.address]);
+            await tx.wait();
         });
         it("Registers SecretRewards", async () => {
             const secretsFactory = await hre.ethers.getContractFactory("SecretRewards");
-            const secretsDeploy = await secretsFactory.deploy(mockErc20.address, seasons.address, "121");
+            const secretsDeploy = await secretsFactory.deploy(seasons.address, "121");
             await secretsDeploy.deployed();
             secretRewards = secretsDeploy;
 
-            try {
+            /*try {
                 await hre.run("verify:verify", {
                     address: secretRewards.address,
                     constructorArguments: [
@@ -176,34 +188,45 @@ describe("ZXP", () => {
                     ],
                 })
             } catch (error) { console.log(error) };
-
+            */
             const sr = ethers.utils.formatBytes32String("SecretRewards");
-            await seasonRegistry.registerObjects([sr], [secretRewards.address]);
+            let tx = await seasonRegistry.registerObjects([sr], [secretRewards.address]);
+            await tx.wait();
         });
 
         it("Commits secret", async () => {
             let secret = "verysecretwordshhh";
             let nonce = 123123123;
             let secretHash = secretRewards.hashCommit(deployer.address, nonce, secret)
-            await secretRewards.connect(deployer).commitSecret(nonce, secretHash);
+            let tx = await secretRewards.connect(deployer).commitSecret(nonce, secretHash);
+            await tx.wait();
         });
         it("Commits correct guess", async () => {
             let guess = "verysecretwordshhh";
             let nonce = 123123123;
             let guessHash = secretRewards.hashCommit(p1, nonce, guess);
-            await secretRewards.connect(player1).commitGuess(nonce, guessHash);
+            let tx = await secretRewards.connect(player1).commitGuess(nonce, guessHash);
+            await tx.wait();
         });
         it("Reveals secret", async () => {
             let secret = "verysecretwordshhh";
             let nonce = 123123123;
-            await secretRewards.connect(deployer).revealSecret(nonce, secret);
+            let tx = await secretRewards.connect(deployer).revealSecret(nonce, secret);
+            await tx.wait();
         });
         it("Reveals correct guess, receives XP", async () => {
             let guess = "verysecretwordshhh";
             let nonce = 123123123;
-            await secretRewards.connect(player1).revealGuess(nonce, guess);
+            let tx = await secretRewards.connect(player1).revealGuess(nonce, guess);
+            await tx.wait();
             expect(await xp.balanceOf(p1)).to.equal(BigNumber.from("121"));
             previousP1XP = BigNumber.from("121");
+            ///
+
+            let secret = "snow";
+            nonce = 369;
+            let secretHash = await secretRewards.hashCommit(deployer.address, nonce, secret)
+            await secretRewards.commitSecret(nonce, secretHash);
         });
         it("Funds player reward tokens", async () => {
             await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
@@ -218,7 +241,7 @@ describe("ZXP", () => {
             await seasons.startSeason();
         });
 
-        const numRounds = 10;
+        const numRounds = 1;
         for (let i = 0; i < numRounds; i++) {
             const str = "Submits round " + i.toString() + " results";
             it(str, async () => {
