@@ -107,7 +107,8 @@ describe("ZXP", () => {
     });
     it("Registers GameVault", async () => {
         const gameVaultBytes = ethers.utils.formatBytes32String("GameVault");
-        await gameRegistry.connect(deployer).registerObjects([gameVaultBytes], [gameVault.address]);
+        let tx = await gameRegistry.connect(deployer).registerObjects([gameVaultBytes], [gameVault.address]);
+        await tx.wait();
     });
     it("Registers XP", async () => {
         const xpBytes = ethers.utils.formatBytes32String("XP");
