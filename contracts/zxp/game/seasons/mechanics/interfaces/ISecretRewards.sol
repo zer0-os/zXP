@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-interface ISecretRewards00 {
+interface ISecretRewards {
     function commitGuess(uint nonce, bytes32 _guessHash) external;
 
     function revealGuess(uint nonce, string memory guess) external;
