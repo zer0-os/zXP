@@ -51,12 +51,19 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
         );
         guesses[msg.sender][nonce] = Commitment({
             secretHash: guessHash,
-            reveal: ""
+            reveal: "",
+            revealed: false
         });
         emit GuessCommitted(msg.sender, nonce, guessHash);
     }
 
-    // Players reveal their guess
+    /** 
+        Players reveal their guess
+        @dev this function does not check if the guess is empty ""
+             and expects this check is done by the secret committer
+        @dev does not store the guess, emits in event
+    */
+
     function revealGuess(uint nonce, string memory guess) public override {
         bytes32 guessHash = hashCommit(msg.sender, nonce, guess);
 
@@ -73,20 +80,35 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
                 keccak256(abi.encode(secrets[nonce].reveal)),
             "Wrong answer"
         );
+        require(
+            guesses[msg.sender][nonce].revealed == false,
+            "ZXP: Guess already revealed"
+        );
         guesses[msg.sender][nonce].reveal = guess;
+        guesses[msg.sender][nonce].revealed = true;
         season.awardXP(msg.sender, xpReward, OBJECT);
         emit GuessRevealed(msg.sender, nonce, guess);
     }
 
+    /**
+        Contract owner commits secret
+     */
     function commitSecret(
         uint nonce,
         bytes32 secretHash
     ) public override only(OWNER) {
         require(secrets[nonce].secretHash == bytes32(0), "No overwriting");
-        secrets[nonce] = Commitment({secretHash: secretHash, reveal: ""});
+        secrets[nonce] = Commitment({
+            secretHash: secretHash,
+            reveal: "",
+            revealed: false
+        });
         emit SecretCommitted(nonce, secretHash);
     }
 
+    /**
+        Contract owner reveals secret
+     */
     function revealSecret(
         uint nonce,
         string memory secret
@@ -103,10 +125,10 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
 
     // Helper function for hashing secret words
     function hashCommit(
-        address player,
+        address committer,
         uint nonce,
         string memory secret
     ) public pure override returns (bytes32) {
-        return keccak256(abi.encode(player, nonce, secret));
+        return keccak256(abi.encode(committer, nonce, secret));
     }
 }
