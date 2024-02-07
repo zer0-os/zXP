@@ -73,9 +73,8 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
                 keccak256(abi.encode(secrets[nonce].reveal)),
             "Wrong answer"
         );
-
+        guesses[msg.sender][nonce].reveal = guess;
         season.awardXP(msg.sender, xpReward, OBJECT);
-
         emit GuessRevealed(msg.sender, nonce, guess);
     }
 
