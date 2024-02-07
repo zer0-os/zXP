@@ -111,7 +111,8 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
      */
     function revealSecret(
         uint nonce,
-        string memory secret
+        string memory secret,
+        uint salt
     ) public override only(OWNER) {
         //bytes memory reveal = bytes()
         require(
@@ -120,7 +121,7 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
         );
         require(bytes(secrets[nonce].reveal).length == 0, "No overwriting");
         secrets[nonce].reveal = secret;
-        emit SecretRevealed(nonce, secret);
+        emit SecretRevealed(nonce, secret, salt);
     }
 
     // Helper function for hashing secret words
