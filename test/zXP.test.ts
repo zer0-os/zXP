@@ -186,7 +186,7 @@ describe("ZXP", () => {
         it("Commits secret", async () => {
             let secret = "verysecretwordshhh";
             let nonce = 123123123;
-            let secretHash = secretRewards.hashCommit(deployer.address, nonce, secret)
+            let secretHash = secretRewards.hashCommit(deployer.address, nonce, secret);
             let tx = await secretRewards.connect(deployer).commitSecret(nonce, secretHash);
             await tx.wait();
         });
@@ -210,8 +210,6 @@ describe("ZXP", () => {
             await tx.wait();
             expect(await xp.balanceOf(p1)).to.equal(BigNumber.from("121"));
             previousP1XP = BigNumber.from("121");
-            ///
-
             let secret = "snow";
             nonce = 369;
             let secretHash = await secretRewards.hashCommit(deployer.address, nonce, secret)
@@ -225,7 +223,6 @@ describe("ZXP", () => {
             await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
             await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
         });
-
         it("Starts the season", async () => {
             await seasons.startSeason();
         });

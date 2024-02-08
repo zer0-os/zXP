@@ -51,19 +51,12 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
         );
         guesses[msg.sender][nonce] = Commitment({
             secretHash: guessHash,
-            reveal: "",
-            revealed: false
+            reveal: ""
         });
         emit GuessCommitted(msg.sender, nonce, guessHash);
     }
 
-    /** 
-        Players reveal their guess
-        @dev this function does not check if the guess is empty ""
-             and expects this check is done by the secret committer
-        @dev does not store the guess, emits in event
-    */
-
+    // Players reveal their guess
     function revealGuess(uint nonce, string memory guess) public override {
         bytes32 guessHash = hashCommit(msg.sender, nonce, guess);
 
@@ -80,39 +73,24 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
                 keccak256(abi.encode(secrets[nonce].reveal)),
             "Wrong answer"
         );
-        require(
-            guesses[msg.sender][nonce].revealed == false,
-            "ZXP: Guess already revealed"
-        );
-        guesses[msg.sender][nonce].reveal = guess;
-        guesses[msg.sender][nonce].revealed = true;
+
         season.awardXP(msg.sender, xpReward, OBJECT);
+
         emit GuessRevealed(msg.sender, nonce, guess);
     }
 
-    /**
-        Contract owner commits secret
-     */
     function commitSecret(
         uint nonce,
         bytes32 secretHash
     ) public override only(OWNER) {
         require(secrets[nonce].secretHash == bytes32(0), "No overwriting");
-        secrets[nonce] = Commitment({
-            secretHash: secretHash,
-            reveal: "",
-            revealed: false
-        });
+        secrets[nonce] = Commitment({secretHash: secretHash, reveal: ""});
         emit SecretCommitted(nonce, secretHash);
     }
 
-    /**
-        Contract owner reveals secret
-     */
     function revealSecret(
         uint nonce,
-        string memory secret,
-        uint salt
+        string memory secret
     ) public override only(OWNER) {
         //bytes memory reveal = bytes()
         require(
@@ -121,15 +99,15 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
         );
         require(bytes(secrets[nonce].reveal).length == 0, "No overwriting");
         secrets[nonce].reveal = secret;
-        emit SecretRevealed(nonce, secret, salt);
+        emit SecretRevealed(nonce, secret);
     }
 
     // Helper function for hashing secret words
     function hashCommit(
-        address committer,
+        address player,
         uint nonce,
         string memory secret
     ) public pure override returns (bytes32) {
-        return keccak256(abi.encode(committer, nonce, secret));
+        return keccak256(abi.encode(player, nonce, secret));
     }
 }
