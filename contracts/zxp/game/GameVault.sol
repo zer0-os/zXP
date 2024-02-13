@@ -9,6 +9,7 @@ import {IObjectRegistry} from "../interfaces/IObjectRegistry.sol";
 import {ObjectRegistryClient} from "../ObjectRegistryClient.sol";
 import {ISeasons} from "./interfaces/ISeasons.sol";
 
+
 contract GameVault is ERC721Wrapper, ObjectRegistryClient, IGameVault {
     bytes32 internal constant SEASONS = "Seasons";
     mapping(uint id => uint block) public stakedAt;
@@ -16,28 +17,32 @@ contract GameVault is ERC721Wrapper, ObjectRegistryClient, IGameVault {
     constructor(
         IERC721 underlyingToken,
         IERC20 _rewardToken,
-        string memory name,
-        string memory symbol,
+        string memory underlyingTokenName,
+        string memory underlyingTokenSymbol,
         IObjectRegistry registry,
         bytes32 game
     )
         ObjectRegistryClient(registry)
-        ERC721(name, symbol)
+        ERC721(underlyingTokenName, underlyingTokenSymbol)
         ERC721Wrapper(underlyingToken)
     {}
 
+    // what is this `id` for? how do we get it? maybe a clearer name?
     function _mint(address to, uint id) internal override {
         stakedAt[id] = block.number;
         super._mint(to, id);
     }
 
     function _burn(uint id) internal override {
+        // moved this for checks-effects pattern to avoid reentrancy
+        uint stakedAt = stakedAt[id];
+        stakedAt[id] = 0;
+
         ISeasons(registry.addressOf(SEASONS)).onUnstake(
             id,
             msg.sender,
-            block.number - stakedAt[id]
+            block.number - stakedAt
         );
-        stakedAt[id] = 0;
         super._burn(id);
     }
 }

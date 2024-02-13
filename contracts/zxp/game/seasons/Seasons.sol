@@ -13,6 +13,8 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
     bytes32 internal constant STAKER_REWARDS = "StakerRewards";
     bytes32 internal constant XP = "XP";
     uint public currentSeason;
+    // is this a constant or a var? if a constant, make it a constant to save gas in tx,
+    // if a var, we need a setter for it
     uint public stakerXPReward = 100;
 
     struct Season {
@@ -21,6 +23,7 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         uint end;
         ObjectRegistry objects;
     }
+
     mapping(uint season => Season data) public seasons;
 
     modifier preseason(uint season) {
@@ -65,6 +68,8 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         require(seasons[currentSeason].start != 0, "ZXP season not started");
         seasons[currentSeason].end = block.number;
         currentSeason++;
+        // will this always be the case? we assume here that the next season will always start at the end of the current one
+        // user also pays to start a new season when he may not need it
         seasons[currentSeason].objects = new ObjectRegistry(msg.sender);
     }
 
@@ -73,8 +78,11 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         address to,
         uint stakedAt
     ) external override only(GAME_VAULT) {
+        // what if this type of contract is not in the .objects? can other contracts be passed there?
+        // and if it always have to be present, where are the checks that a correct contract has been set?
         IStakerRewards(seasons[currentSeason].objects.addressOf(STAKER_REWARDS))
             .onUnstake(id, to, stakedAt);
+        // same here, what if this contract is not added or other contract is added that has a different ABI?
         IXP(registry.addressOf(XP)).awardXP(
             to,
             stakerXPReward * (block.number - stakedAt)

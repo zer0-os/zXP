@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {IObjectRegistry} from "./interfaces/IObjectRegistry.sol";
+import { IObjectRegistry } from "./interfaces/IObjectRegistry.sol";
+
 
 /**
  * @dev Base contract for Registry clients

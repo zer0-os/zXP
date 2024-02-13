@@ -105,17 +105,20 @@ describe("ZXP", () => {
         s1 = staker1.address;
         s2 = staker2.address;
     });
+
     it("Registers GameVault", async () => {
         const gameVaultBytes = ethers.utils.formatBytes32String("GameVault");
         let tx = await gameRegistry.connect(deployer).registerObjects([gameVaultBytes], [gameVault.address]);
         await tx.wait();
     });
+
     it("Registers XP", async () => {
         const xpBytes = ethers.utils.formatBytes32String("XP");
         await gameRegistry.connect(deployer).registerObjects([xpBytes], [xp.address]);
         //console.log(await gameRegistry.addressOf(xpBytes));
         expect(await gameRegistry.addressOf(xpBytes)).to.equal(xp.address)
     });
+
     it("Registers Seasons", async () => {
         const seasonBytes = ethers.utils.formatBytes32String("Seasons");
         await gameRegistry.connect(deployer).registerObjects([seasonBytes], [seasons.address]);
@@ -123,26 +126,41 @@ describe("ZXP", () => {
 
     const numSeasons = 1
     for (let i = 0; i < numSeasons; i++) {
+        // these are tests, but I don't see any specific checks here
+        // if you rely on reverts failing tests here, these reverts need to be checked
+        // to make sure it fails with the correct message,
+        // otherwise it's not a test
         it("Mints staker 1 NFT", async () => {
             s1nft = s1nft + 3;
             await mockErc721.connect(deployer).mint(s1, s1nft);
         });
+
         it("Staker 1 stakes NFT", async () => {
+            // this should in theory be resolved by the typechain type, so you could access it
+            // through dot notation
+            // just assign a proper type to `mockErc721` and you will be able to call methods with
+            // dot notation. there's no need to set all let vars to `Contract` type since it's not a correct type
+            // for these tests, it's a general type for all contracts
+            // use specific types here
             await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVault.address, s1nft);
         });
+
         it("Mints Staker 2 NFT", async () => {
             s2nft = s2nft + 3;
             await mockErc721.connect(deployer).mint(s2, s2nft);
         });
+
         it("Player2 stakes NFT", async () => {
             await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, gameVault.address, s2nft);
         });
+
         it("Gets season registry", async () => {
             const storedSeason = await seasons.seasons(await seasons.currentSeason());
             const storedRegistry = storedSeason.objects;
             const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");
             seasonRegistry = await ObjectRegistryFactory.attach(storedRegistry);
         });
+
         it("Registers StakerRewards", async () => {
             const stakerRewardsFactory = await hre.ethers.getContractFactory("StakerRewards");
             const stakerRewardsDeploy = await stakerRewardsFactory.deploy(mockErc20.address, "10", gameVault.address, gameVault.address, seasons.address);
@@ -150,9 +168,12 @@ describe("ZXP", () => {
             stakerRewards = stakerRewardsDeploy;
 
             const sr = ethers.utils.formatBytes32String("StakerRewards");
+            // why do we register this on 2 different contracts?
+            // why do we need 2 different registries here or in general?
             await gameRegistry.registerObjects([sr], [stakerRewards.address]);
             await seasonRegistry.registerObjects([sr], [stakerRewards.address]);
         });
+
         it("Registers PlayerRewards", async () => {
             const top3rewardsFactory = await hre.ethers.getContractFactory("PlayerRewards");
             const top3deploy = await top3rewardsFactory.deploy(official.address, mockErc20.address, seasons.address, playerXPReward.toString());
@@ -160,8 +181,10 @@ describe("ZXP", () => {
             top3Rewards = top3deploy;
 
             const pr = ethers.utils.formatBytes32String("PlayerRewards");
+            // but this one we register on one registry? why?
             await seasonRegistry.registerObjects([pr], [top3Rewards.address]);
         });
+
         it("Registers SecretRewards", async () => {
             const secretsFactory = await hre.ethers.getContractFactory("SecretRewards");
             const secretsDeploy = await secretsFactory.deploy(seasons.address, "121");
@@ -190,6 +213,7 @@ describe("ZXP", () => {
             let tx = await secretRewards.connect(deployer).commitSecret(nonce, secretHash);
             await tx.wait();
         });
+
         it("Commits correct guess", async () => {
             let guess = "verysecretwordshhh";
             let nonce = 123123123;
@@ -197,17 +221,20 @@ describe("ZXP", () => {
             let tx = await secretRewards.connect(player1).commitGuess(nonce, guessHash);
             await tx.wait();
         });
+
         it("Reveals secret", async () => {
             let secret = "verysecretwordshhh";
             let nonce = 123123123;
             let tx = await secretRewards.connect(deployer).revealSecret(nonce, secret);
             await tx.wait();
         });
+
         it("Reveals correct guess, receives XP", async () => {
             let guess = "verysecretwordshhh";
             let nonce = 123123123;
             let tx = await secretRewards.connect(player1).revealGuess(nonce, guess);
             await tx.wait();
+            // can we not use hardcoded values anywhere? this makes maintenance difficult
             expect(await xp.balanceOf(p1)).to.equal(BigNumber.from("121"));
             previousP1XP = BigNumber.from("121");
             let secret = "snow";
@@ -215,14 +242,20 @@ describe("ZXP", () => {
             let secretHash = await secretRewards.hashCommit(deployer.address, nonce, secret)
             await secretRewards.commitSecret(nonce, secretHash);
         });
+
         it("Funds player reward tokens", async () => {
+            // fix all these string based access calls
             await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
             await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
+            // how do we know here if anything is funded or not? where are the balance checks?
+            // none of these tests have any valid checks that make me believe this thing works
         });
+
         it("Funds staker reward tokens", async () => {
             await mockErc20.connect(deployer)["transfer(address,uint256)"](top3Rewards.address, "1000000000000000000000000");
             await mockErc20.connect(deployer)["transfer(address,uint256)"](stakerRewards.address, "1000000000000000000000000");
         });
+
         it("Starts the season", async () => {
             await seasons.startSeason();
         });
@@ -230,6 +263,7 @@ describe("ZXP", () => {
         const numRounds = 10;
         for (let i = 0; i < numRounds; i++) {
             const str = "Submits round " + i.toString() + " results";
+
             it(str, async () => {
                 firstReward = "1000000000000000000000";
                 secondReward = "100000000000000000000";
@@ -253,6 +287,7 @@ describe("ZXP", () => {
                 previousP2Bal = newP2Bal;
                 previousP3Bal = newP3Bal;
             });
+
             it("Awarded xp to winners", async () => {
                 let reward1 = BigNumber.from(playerXPReward * 3);
                 let reward2 = BigNumber.from(playerXPReward * 2);
@@ -269,6 +304,7 @@ describe("ZXP", () => {
                 previousP2XP = newP2XP;
                 previousP3XP = newP3XP;
             });
+
             it("Levels up", async () => {
                 let p1XP = await xp.balanceOf(p1);
                 let playerLevel = await xp.levelAt(p1XP);
@@ -278,9 +314,11 @@ describe("ZXP", () => {
                 console.log(xpReq.toString());
             });
         }
+
         it("Staker 1 unstakes and claims rewards", async () => {
             await gameVault.connect(staker1).withdrawTo(s1, [s1nft]);
         });
+
         it("Ends the season", async () => {
             await seasons.endSeason();
         });
