@@ -18,8 +18,10 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
         ISeasons seasonManager,
         uint xpRewarded
     )
+    // here another double-external call to set the variable that's already available
         ObjectRegistryClient(
             IObjectRegistry(
+            // is there a different registry contract for every season?
                 seasonManager.getRegistryAddress(seasonManager.currentSeason())
             )
         )
@@ -33,6 +35,7 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
         string reveal;
     }
 
+    // what is the reason there's no nonce counter on the contract?
     mapping(uint nonce => Commitment commit) public secrets;
     mapping(address player => mapping(uint nonce => Commitment commit))
         public guesses;
@@ -47,7 +50,7 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
     function commitGuess(uint nonce, bytes32 guessHash) public override {
         require(
             bytes(secrets[nonce].reveal).length == 0,
-            "No overwrite after reveal"
+            "No overwrite after reveal" // seems like a wrong message
         );
         guesses[msg.sender][nonce] = Commitment({
             secretHash: guessHash,
@@ -62,13 +65,15 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
 
         require(
             guessHash == guesses[msg.sender][nonce].secretHash,
-            "Invalid reveal"
+            "Invalid reveal" // unclear message
         );
         require(
             bytes(secrets[nonce].reveal).length != 0,
             "Answer not revealed"
         );
         require(
+            // why is this necessary to hash these here and not just compare string directly?
+            // what do we miss when just comparing strings?
             keccak256(abi.encode(guess)) ==
                 keccak256(abi.encode(secrets[nonce].reveal)),
             "Wrong answer"
@@ -88,6 +93,12 @@ contract SecretRewards is ObjectRegistryClient, ISecretRewards {
         emit SecretCommitted(nonce, secretHash);
     }
 
+    // this whole flow seems redundant. an user that has the hash
+    // (that is available on the contract by the time a user commits a guess,
+    // he can locally keep hashing his guesses to get the same hash,
+    // once he gets the same hash he (and we) already know that his guess is correct,
+    // so we should be able to reward him at guess commit time and this whole reveal secret flow
+    // seems redundant
     function revealSecret(
         uint nonce,
         string memory secret

@@ -9,6 +9,7 @@ import {ObjectRegistryClient} from "../../../ObjectRegistryClient.sol";
 import {IObjectRegistry} from "../../../interfaces/IObjectRegistry.sol";
 import {ISeasons} from "../../interfaces/ISeasons.sol";
 
+
 contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
     bytes32 internal constant name = "PlayerRewards";
     IERC20 public rewardToken;
@@ -22,6 +23,8 @@ contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
         ISeasons seasonManager,
         uint xpRewarded
     )
+    // this seems to be called on every single contract. what is the point of it?
+    // if we already have access to this value, why do we need to write it in every single state?
         ObjectRegistryClient(
             IObjectRegistry(
                 seasonManager.getRegistryAddress(seasonManager.currentSeason())
@@ -38,6 +41,12 @@ contract PlayerRewards is ObjectRegistryClient, Ownable, IPlayerRewards {
         rewardToken.transfer(to, rewards[to]);
     }
 
+    // when is this called? why 3 results?
+    // why not addresses and uints arrays?
+    // also, what is the point of this contract if the decision to disperse
+    // rewards is made by the caller by an external call at arbitrary time?
+    // we can just do this all off-chain and the result seems the same
+    // from the trust standpoint
     function submitTop3Results(
         address first,
         address second,

@@ -9,6 +9,7 @@ import {ISeasons} from "../../interfaces/ISeasons.sol";
 import {ObjectRegistryClient} from "../../../ObjectRegistryClient.sol";
 import {IObjectRegistry} from "../../../interfaces/IObjectRegistry.sol";
 
+
 contract StakerRewards is ObjectRegistryClient, IStakerRewards {
     IERC20 public rewardToken;
     uint public rewardPerBlock;
@@ -19,6 +20,7 @@ contract StakerRewards is ObjectRegistryClient, IStakerRewards {
     mapping(address awardee => uint amount) public rewards;
     mapping(uint nft => uint block) public claimedAt;
 
+    // incorrect naming here. what is even registry in zXP? is it seasons? is it ObjectRegistry?
     modifier onlyRegistry(address checked) {
         require(checked == address(seasons), "ZXP: not registry");
         _;
@@ -49,6 +51,7 @@ contract StakerRewards is ObjectRegistryClient, IStakerRewards {
     function onUnstake(
         uint id,
         address to,
+        // why don't we check this value against a mapping in GameVault ?
         uint stakedAt
     ) external override onlyRegistry(msg.sender) {
         uint numBlocks;
