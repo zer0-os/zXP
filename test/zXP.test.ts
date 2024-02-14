@@ -73,9 +73,9 @@ describe("ZXP", () => {
         games = gamesDeploy;
 
         //create empty game
-        await games.createGame(gameName, deployer.address, "description", [], []);
+        await games.createGame(gameName, deployer.address, "description");
         const storedGame = await games.games(gameName);
-        const gameObjects = storedGame.objects;
+        const gameObjects = storedGame.gameObjects;
         const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");
         gameRegistry = await ObjectRegistryFactory.attach(gameObjects);
 
@@ -139,7 +139,7 @@ describe("ZXP", () => {
         });
         it("Gets season registry", async () => {
             const storedSeason = await seasons.seasons(await seasons.currentSeason());
-            const storedRegistry = storedSeason.objects;
+            const storedRegistry = storedSeason.seasonObjects;
             const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");
             seasonRegistry = await ObjectRegistryFactory.attach(storedRegistry);
         });
@@ -167,7 +167,6 @@ describe("ZXP", () => {
             const secretsDeploy = await secretsFactory.deploy(seasons.address, "121");
             await secretsDeploy.deployed();
             secretRewards = secretsDeploy;
-
             /*try {
                 await hre.run("verify:verify", {
                     address: secretRewards.address,

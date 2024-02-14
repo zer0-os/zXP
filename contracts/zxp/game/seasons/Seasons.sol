@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ISeasons} from "../interfaces/ISeasons.sol";
 import {ObjectRegistry, IObjectRegistry} from "../../ObjectRegistry.sol";
 import {ObjectRegistryClient} from "../../ObjectRegistryClient.sol";
 import {IStakerRewards} from "./mechanics/interfaces/IStakerRewards.sol";
 import {IXP} from "../interfaces/IXP.sol";
 
-contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
+contract Seasons is ObjectRegistryClient, ISeasons {
+    bytes32 internal constant OWNER = "Owner";
     bytes32 internal constant GAME_VAULT = "GameVault";
     bytes32 internal constant STAKER_REWARDS = "StakerRewards";
     bytes32 internal constant XP = "XP";
     uint public currentSeason;
-    uint public stakerXPReward = 100;
+    uint private constant STAKER_XP_REWARD = 100;
 
     struct Season {
         string metadata;
         uint start;
         uint end;
-        ObjectRegistry objects;
+        ObjectRegistry seasonObjects;
     }
     mapping(uint season => Season data) public seasons;
 
@@ -31,7 +31,9 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
     modifier onlyRegistered(address object, bytes32 name) {
         require(
             address(
-                ObjectRegistry(seasons[currentSeason].objects.addressOf(name))
+                ObjectRegistry(
+                    seasons[currentSeason].seasonObjects.addressOf(name)
+                )
             ) == object,
             "ZXP: Object not registered"
         );
@@ -39,20 +41,19 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
     }
 
     constructor(IObjectRegistry registry) ObjectRegistryClient(registry) {
-        Ownable(msg.sender);
-        seasons[currentSeason].objects = new ObjectRegistry(msg.sender);
+        seasons[currentSeason].seasonObjects = new ObjectRegistry(msg.sender);
     }
 
     function getRegistryAddress(
         uint season
     ) external view override returns (address) {
-        return address(seasons[season].objects);
+        return address(seasons[season].seasonObjects);
     }
 
     function startSeason()
         external
         override
-        onlyOwner
+        only(OWNER)
         preseason(currentSeason)
     {
         seasons[currentSeason].start = block.number;
@@ -61,11 +62,11 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
     /**
         @dev sets currentSeason.end and increments currentSeason
      */
-    function endSeason() external override onlyOwner {
+    function endSeason() external override only(OWNER) {
         require(seasons[currentSeason].start != 0, "ZXP season not started");
         seasons[currentSeason].end = block.number;
         currentSeason++;
-        seasons[currentSeason].objects = new ObjectRegistry(msg.sender);
+        seasons[currentSeason].seasonObjects = new ObjectRegistry(msg.sender);
     }
 
     function onUnstake(
@@ -73,11 +74,12 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         address to,
         uint stakedAt
     ) external override only(GAME_VAULT) {
-        IStakerRewards(seasons[currentSeason].objects.addressOf(STAKER_REWARDS))
-            .onUnstake(id, to, stakedAt);
+        IStakerRewards(
+            seasons[currentSeason].seasonObjects.addressOf(STAKER_REWARDS)
+        ).onUnstake(id, to, stakedAt);
         IXP(registry.addressOf(XP)).awardXP(
             to,
-            stakerXPReward * (block.number - stakedAt)
+            STAKER_XP_REWARD * (block.number - stakedAt)
         );
     }
 

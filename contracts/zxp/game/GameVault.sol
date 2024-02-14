@@ -16,13 +16,13 @@ contract GameVault is ERC721Wrapper, ObjectRegistryClient, IGameVault {
     constructor(
         IERC721 underlyingToken,
         IERC20 _rewardToken,
-        string memory name,
-        string memory symbol,
+        string memory stakedTokenName, ///name of tokens that this contract issues on stake of underlyingToken
+        string memory stakedTokenSymbol, ///symbol of tokens that this contract issues on stake of underlyingToken
         IObjectRegistry registry,
         bytes32 game
     )
         ObjectRegistryClient(registry)
-        ERC721(name, symbol)
+        ERC721(stakedTokenName, stakedTokenSymbol)
         ERC721Wrapper(underlyingToken)
     {}
 
@@ -32,12 +32,13 @@ contract GameVault is ERC721Wrapper, ObjectRegistryClient, IGameVault {
     }
 
     function _burn(uint id) internal override {
+        uint wasStakedAt = stakedAt[id];
+        stakedAt[id] = 0;
         ISeasons(registry.addressOf(SEASONS)).onUnstake(
             id,
             msg.sender,
-            block.number - stakedAt[id]
+            block.number - wasStakedAt
         );
-        stakedAt[id] = 0;
         super._burn(id);
     }
 }
