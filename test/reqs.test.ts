@@ -55,6 +55,15 @@ describe("Requirements testing", () => {
       staker,
     ] = await hre.ethers.getSigners();
 
+    // Deployments
+    // 1. MockERC20
+    // 2. MockERC721
+    // 3. Games
+    // 4. Seasons
+    // 5. XP
+    // 6. GameVault
+    // 7. StakerRewards
+
     const mockERC20Factory = await hre.ethers.getContractFactory("MockERC20");
     // Will immediately mint and transfer to msg.sender
     mockERC20 = await mockERC20Factory.deploy("MEOW", "MEOW");
@@ -67,10 +76,10 @@ describe("Requirements testing", () => {
 
     const gameName = "StakingGame";
     const gameNameBytes = hre.ethers.utils.formatBytes32String(gameName);
-    await games.createGame(gameNameBytes, deployer.address, "a-staking-game", [], []);
+    await games.createGame(gameNameBytes, deployer.address, "a-staking-game");
 
     // Registry for the StakingGame
-    stakingGameRegistryAddress = (await games.games(gameNameBytes)).objects;
+    stakingGameRegistryAddress = (await games.games(gameNameBytes)).gameObjects;
     stakingGameRegistry = ObjectRegistry__factory.connect(stakingGameRegistryAddress, deployer);
 
     const seasonsFactory = await hre.ethers.getContractFactory("Seasons");
@@ -105,7 +114,7 @@ describe("Requirements testing", () => {
     await mockERC20.connect(deployer).transfer(rewards.address, await mockERC20.balanceOf(deployer.address));
 
     // Registry for season 0 of the StakingGame
-    seasons0RegistryAddress = (await seasons.seasons(0)).objects;
+    seasons0RegistryAddress = (await seasons.seasons(0)).seasonObjects;
     seasons0Registry = ObjectRegistry__factory.connect(seasons0RegistryAddress, deployer);
 
     // Registry for the Seasons contract
@@ -183,7 +192,7 @@ describe("Requirements testing", () => {
     const stakerBalanceGMVLTBefore = await gameVault.balanceOf(staker.address);
     const stakerBalanceERC20Before = await mockERC20.balanceOf(staker.address);
 
-    // gameVault.withdrawTo => seasons.onUnstake() => stakerRewards.onUnsake()
+    // gameVault.withdrawTo => seasons.onUnstake() => stakerRewards.onUnstake()
     // 1.6 - User can unstake at any time.
     await gameVault.connect(staker).withdrawTo(staker.address, [1]);
 
