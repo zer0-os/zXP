@@ -79,4 +79,12 @@ contract MockERC721 is ERC721, AccessControl, IMockERC721 {
     ) public view virtual override(ERC721, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        super.safeTransferFrom(from, to, tokenId, "");
+    }
 }

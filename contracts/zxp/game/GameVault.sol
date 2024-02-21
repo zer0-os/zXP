@@ -11,6 +11,8 @@ import {ISeasons} from "./interfaces/ISeasons.sol";
 
 contract GameVault is ERC721Wrapper, ObjectRegistryClient, IGameVault {
     bytes32 internal constant SEASONS = "Seasons";
+    // TODO should be nested mapping to include which user staked it, maybe
+    // Depends on if we want to allow the game vault token to be transferable?
     mapping(uint id => uint block) public stakedAt;
 
     constructor(
@@ -19,7 +21,7 @@ contract GameVault is ERC721Wrapper, ObjectRegistryClient, IGameVault {
         string memory name,
         string memory symbol,
         IObjectRegistry registry,
-        bytes32 game
+        bytes32 game // unused
     )
         ObjectRegistryClient(registry)
         ERC721(name, symbol)
@@ -35,7 +37,8 @@ contract GameVault is ERC721Wrapper, ObjectRegistryClient, IGameVault {
         ISeasons(registry.addressOf(SEASONS)).onUnstake(
             id,
             msg.sender,
-            block.number - stakedAt[id]
+            block.number - stakedAt[id] 
+            // param expects just `stakedAt[i]` not `block.number - stakedAt[i]`
         );
         stakedAt[id] = 0;
         super._burn(id);

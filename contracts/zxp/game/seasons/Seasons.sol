@@ -28,6 +28,7 @@ contract Seasons is ObjectRegistryClient, ISeasons, Ownable {
         _;
     }
 
+    // ZXP modifier in seasons?
     modifier onlyRegistered(address object, bytes32 name) {
         require(
             address(

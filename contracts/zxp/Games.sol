@@ -7,7 +7,7 @@ import {ObjectRegistry} from "./ObjectRegistry.sol";
 contract Games is IGames, ObjectRegistry {
     struct Game {
         string metadata;
-        ObjectRegistry objects;
+        ObjectRegistry objects; // naming should be "registry"
     }
     mapping(bytes32 name => Game game) public games;
 
