@@ -58,11 +58,14 @@ contract StakerRewards is ObjectRegistryClient, IStakerRewards {
             numBlocks = block.number - stakedAt;
         }
         claimedAt[id] = block.number;
+        // TODO should this include a zero check so we don't call unnecessarily?
         rewardToken.transfer(to, rewardPerBlock * numBlocks);
     }
 
     function claim(uint id) external override {
         require(
+            // TODO This `ownerOf` call will be incorrect
+            // The owner of the NFT while it is staked is the game vault, not the user
             underlyingToken.ownerOf(id) == msg.sender,
             "ZXP claimer isnt owner"
         );
