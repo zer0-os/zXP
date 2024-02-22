@@ -14,7 +14,7 @@ contract XP is ObjectRegistryClient, QuadraticLevelCurve, ERC20, IXP {
         string memory name,
         string memory symbol,
         IObjectRegistry registry,
-        bytes32 game
+        bytes32 game // unused
     ) ObjectRegistryClient(registry) ERC20(name, symbol) {}
 
     function _beforeTokenTransfer(

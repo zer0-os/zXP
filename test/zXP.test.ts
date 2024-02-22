@@ -66,13 +66,13 @@ describe("ZXP", () => {
         await erc721.deployed();
         mockErc721 = erc721;
 
-        gameName = ethers.utils.formatBytes32String("game0");
         const gamesFactory = await hre.ethers.getContractFactory("Games");
-        const gamesDeploy = await gamesFactory.deploy();
+        const gamesDeploy = await gamesFactory.deploy(); // uses this.signer internally
         await gamesDeploy.deployed();
         games = gamesDeploy;
-
-        //create empty game
+        
+        // create empty game
+        gameName = ethers.utils.formatBytes32String("game0");
         await games.createGame(gameName, deployer.address, "description");
         const storedGame = await games.games(gameName);
         const gameObjects = storedGame.gameObjects;
@@ -128,6 +128,8 @@ describe("ZXP", () => {
             await mockErc721.connect(deployer).mint(s1, s1nft);
         });
         it("Staker 1 stakes NFT", async () => {
+            // how does user get staked nft back? is it burned on unstake?
+            // nothing calls `_burn` and its internal, so never accessed?
             await mockErc721.connect(staker1)["safeTransferFrom(address,address,uint256)"](s1, gameVault.address, s1nft);
         });
         it("Mints Staker 2 NFT", async () => {
@@ -138,6 +140,8 @@ describe("ZXP", () => {
             await mockErc721.connect(staker2)["safeTransferFrom(address,address,uint256)"](s2, gameVault.address, s2nft);
         });
         it("Gets season registry", async () => {
+            // shouldnt I be able to get this info through the gameRegistry?
+            // why do we have another registry?
             const storedSeason = await seasons.seasons(await seasons.currentSeason());
             const storedRegistry = storedSeason.seasonObjects;
             const ObjectRegistryFactory = await hre.ethers.getContractFactory("ObjectRegistry");

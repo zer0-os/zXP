@@ -28,6 +28,7 @@ contract Seasons is ObjectRegistryClient, ISeasons {
         _;
     }
 
+    // ZXP modifier in seasons?
     modifier onlyRegistered(address object, bytes32 name) {
         require(
             address(
@@ -80,6 +81,7 @@ contract Seasons is ObjectRegistryClient, ISeasons {
         IXP(registry.addressOf(XP)).awardXP(
             to,
             STAKER_XP_REWARD * (block.number - stakedAt)
+            // TODO are `rewardsPerBlock` and `STAKER_XP_REWARD` expected to be the same?
         );
     }
 
