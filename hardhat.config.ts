@@ -49,15 +49,15 @@ const config: HardhatUserConfig = {
     timeout: 5000000,
   },
   networks: {
-    mainnet: {
-      url: process.env.MAINNET_RPC_URL,
-      gasPrice: 80000000000,
-    },
-    sepolia: {
-      url: process.env.SEPOLIA_RPC_URL,
-      timeout: 10000000,
-      //chainId: 11155111
-    },
+    // mainnet: {
+    //   // url: process.env.MAINNET_RPC_URL,
+    //   // gasPrice: 80000000000,
+    // },
+    // sepolia: {
+    //   // url: process.env.SEPOLIA_RPC_URL,
+    //   // timeout: 10000000,
+    //   //chainId: 11155111
+    // },
     devnet: {
       // Add current URL that you spawned if not using automated spawning
       url: `${process.env.DEVNET_RPC_URL}`,

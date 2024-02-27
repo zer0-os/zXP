@@ -11,8 +11,10 @@ import {
   ObjectRegistry__factory,
   Seasons,
   StakerRewards,
+  Staking,
   XP,
 } from "../typechain";
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
 // Test core requirements for Staking
@@ -203,5 +205,77 @@ describe("Requirements testing", () => {
     expect(stakerBalanceAfter).eq(stakerBalanceBefore.add(1));
     expect(stakerBalanceGMVLTAfter).eq(stakerBalanceGMVLTBefore.sub(1));
     expect(stakerBalanceERC20After).gt(stakerBalanceERC20Before);
+  });
+
+  describe.only("Rework", () => {
+    let deployer : SignerWithAddress;
+    let staker : SignerWithAddress;
+    
+    let stakingContract : Staking;
+
+    let mockERC20 : MockERC20;
+    let mockERC721 : MockERC721;
+
+    type StakingConfig = {
+      stakingToken : string;
+      rewardsToken : string;
+      rewardsPerBlock : string;
+    }
+
+    let config : StakingConfig;
+
+    before(async () => {
+      [
+        deployer,
+        staker,
+      ] = await hre.ethers.getSigners();
+
+      const mockERC20Factory = await hre.ethers.getContractFactory("MockERC20");
+      mockERC20 = await mockERC20Factory.deploy("MEOW", "MEOW");
+
+      const mockERC721Factory = await hre.ethers.getContractFactory("MockERC721");
+      mockERC721 = await mockERC721Factory.deploy("WilderWheels", "WW", "0://wheels-base");
+
+      config = {
+        stakingToken : mockERC721.address,
+        rewardsToken : mockERC20.address,
+        rewardsPerBlock : hre.ethers.utils.parseEther("100").toString(),
+      }
+
+      const stakingFactory = await hre.ethers.getContractFactory("Staking");
+      stakingContract = await stakingFactory.deploy("StakingNFT", "SNFT", config);
+
+      // Give staking contract balance to pay rewards (maybe house these in a vault of some kind)
+      mockERC20.connect(deployer).transfer(stakingContract.address, hre.ethers.utils.parseEther("1000000"));
+    });
+
+    it("Can call burn on a token that is not owned by the contract?", async () => {
+      // first mint and stake a token, then call to unstake it and see if burn succeeds
+      const tid = 1;
+      await mockERC721.connect(deployer).mint(staker.address, tid);
+
+      await mockERC721.connect(staker).approve(stakingContract.address, tid);
+
+      await stakingContract.connect(staker).stake(tid);
+
+      const blocks = 10;
+      await mine(blocks);
+
+      // Staker will now have given up NFT but received an SNFT
+      // does "_burn" succeed?
+      const balanceBefore = await mockERC20.balanceOf(staker.address);
+
+      await stakingContract.connect(staker).unstake(tid);
+
+      const rewardsPerBlock = (await stakingContract.config()).rewardsPerBlock;
+
+      const balanceAfter = await mockERC20.balanceOf(staker.address);
+
+      // We do blocks + 1 because the unstake call is executed on a new block in testing
+      expect(balanceAfter).to.be.gt(balanceBefore.add(rewardsPerBlock.mul(blocks+1)));
+
+      // cannot unstake twice
+      await expect(stakingContract.connect(staker).unstake(tid)).to.be.reverted;
+    });
   });
 });
