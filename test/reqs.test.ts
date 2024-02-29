@@ -12,6 +12,7 @@ import {
   Seasons,
   StakerRewards,
   Staking,
+  StakingMultiple,
   XP,
 } from "../typechain";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
@@ -207,7 +208,7 @@ describe("Requirements testing", () => {
     expect(stakerBalanceERC20After).gt(stakerBalanceERC20Before);
   });
 
-  describe.only("Rework", () => {
+  describe("Rework", () => {
     let deployer : SignerWithAddress;
     let staker : SignerWithAddress;
     
@@ -223,6 +224,7 @@ describe("Requirements testing", () => {
     }
 
     let config : StakingConfig;
+    let tokenId : number;
 
     before(async () => {
       [
@@ -247,35 +249,203 @@ describe("Requirements testing", () => {
 
       // Give staking contract balance to pay rewards (maybe house these in a vault of some kind)
       mockERC20.connect(deployer).transfer(stakingContract.address, hre.ethers.utils.parseEther("1000000"));
+
+      tokenId = 1;
     });
 
-    it("Can call burn on a token that is not owned by the contract?", async () => {
-      // first mint and stake a token, then call to unstake it and see if burn succeeds
-      const tid = 1;
-      await mockERC721.connect(deployer).mint(staker.address, tid);
+    it("Can stake an NFT", async () => {
+      await mockERC721.connect(deployer).mint(staker.address, tokenId);
 
-      await mockERC721.connect(staker).approve(stakingContract.address, tid);
+      await mockERC721.connect(staker).approve(stakingContract.address, tokenId);
 
-      await stakingContract.connect(staker).stake(tid);
+      await stakingContract.connect(staker).stake(tokenId);
 
+      // User has staked their NFT and gained an SNFT
+      expect(await mockERC721.balanceOf(staker.address)).to.eq(0);
+      expect(await stakingContract.balanceOf(staker.address)).to.eq(1);
+    });
+
+    it("Can claim rewards on a staked token", async () => {
       const blocks = 10;
       await mine(blocks);
 
-      // Staker will now have given up NFT but received an SNFT
-      // does "_burn" succeed?
       const balanceBefore = await mockERC20.balanceOf(staker.address);
 
-      await stakingContract.connect(staker).unstake(tid);
+      await stakingContract.connect(staker).claim(tokenId);
+
+      const rewardsPerBlock = (await stakingContract.config()).rewardsPerBlock;
+
+      const balanceAfter = await mockERC20.balanceOf(staker.address);
+
+      // We do blocks + 1 because the claim call is executed on a new block in testing
+      expect(balanceAfter).to.be.gt(balanceBefore.add(rewardsPerBlock.mul(blocks + 1)));
+    });
+
+    it("Can unstake a token", async () => {
+      const blocks = 10;
+      await mine(blocks);
+
+      const balanceBefore = await mockERC20.balanceOf(staker.address);
+
+      await stakingContract.connect(staker).unstake(tokenId);
 
       const rewardsPerBlock = (await stakingContract.config()).rewardsPerBlock;
 
       const balanceAfter = await mockERC20.balanceOf(staker.address);
 
       // We do blocks + 1 because the unstake call is executed on a new block in testing
-      expect(balanceAfter).to.be.gt(balanceBefore.add(rewardsPerBlock.mul(blocks+1)));
-
-      // cannot unstake twice
-      await expect(stakingContract.connect(staker).unstake(tid)).to.be.reverted;
+      expect(balanceAfter).to.be.gt(balanceBefore.add(rewardsPerBlock.mul(blocks + 1)));
     });
+
+    it("Can call burn on a token that is not owned by the contract?", async () => {
+      // first mint and stake a token, then call to unstake it and see if burn succeeds
+      
+
+      // const blocks = 10;
+      // await mine(blocks);
+
+      // // Staker will now have given up NFT but received an SNFT
+      // // does "_burn" succeed?
+      // const balanceBefore = await mockERC20.balanceOf(staker.address);
+
+      // await stakingContract.connect(staker).unstake(tokenId);
+
+      // const rewardsPerBlock = (await stakingContract.config()).rewardsPerBlock;
+
+      // const balanceAfter = await mockERC20.balanceOf(staker.address);
+
+      // // We do blocks + 1 because the unstake call is executed on a new block in testing
+      // expect(balanceAfter).to.be.gt(balanceBefore.add(rewardsPerBlock.mul(blocks + 1)));
+
+      // // cannot unstake twice
+      // await expect(stakingContract.connect(staker).unstake(tokenId)).to.be.reverted;
+    });
+  });
+
+  describe.only("Rework StakeMultiple", async () => {
+    let deployer : SignerWithAddress;
+    let staker : SignerWithAddress;
+    
+    let stakingContract : StakingMultiple;
+
+    let mockERC20 : MockERC20;
+    let mockERC721 : MockERC721;
+
+    type StakingConfig = {
+      stakingToken : string;
+      rewardsToken : string;
+      rewardsPerBlock : string;
+    }
+
+    let defaultConfig : StakingConfig;
+    let defaultStakingId : string;
+    let tokenId : number;
+
+    before(async () => {
+      [
+        deployer,
+        staker,
+      ] = await hre.ethers.getSigners();
+
+      const mockERC20Factory = await hre.ethers.getContractFactory("MockERC20");
+      mockERC20 = await mockERC20Factory.deploy("MEOW", "MEOW");
+
+      const mockERC721Factory = await hre.ethers.getContractFactory("MockERC721");
+      mockERC721 = await mockERC721Factory.deploy("WilderWheels", "WW", "0://wheels-base");
+
+      // Create a default configuration
+      defaultConfig = {
+        stakingToken : mockERC721.address,
+        rewardsToken : mockERC20.address,
+        rewardsPerBlock : hre.ethers.utils.parseEther("100").toString(),
+      }
+
+      const stakingFactory = await hre.ethers.getContractFactory("StakingMultiple");
+      stakingContract = await hre.upgrades.deployProxy(
+        stakingFactory,
+        [
+          "StakingNFT",
+          "SNFT",
+        ]) as StakingMultiple;
+
+      // Give staking contract balance to pay rewards (maybe house these in a vault of some kind)
+      mockERC20.connect(deployer).transfer(stakingContract.address, hre.ethers.utils.parseEther("1000000"));
+
+      tokenId = 1;
+
+      // Create the initial default staking configuration
+      await stakingContract.connect(deployer).setConfig(defaultConfig);
+      defaultStakingId = await stakingContract.getStakingId(defaultConfig);
+
+      // Give the staker an NFT
+      await mockERC721.connect(deployer).mint(staker.address, tokenId);
+      // Approve the staking contract to stake the NFT
+      await mockERC721.connect(staker).approve(stakingContract.address, tokenId);
+    });
+
+    it("An admin can configure a contract for staking correctly", async () => {
+      const config = await stakingContract.configs(defaultStakingId);
+
+      expect(config.stakingToken).to.eq(defaultConfig.stakingToken);
+      expect(config.rewardsToken).to.eq(defaultConfig.rewardsToken);
+      expect(config.rewardsPerBlock).to.eq(defaultConfig.rewardsPerBlock);
+    });
+
+    it("User can stake an NFT", async () => {
+      await stakingContract.connect(staker).stake(defaultStakingId, tokenId);
+
+      // User has staked their NFT and gained an SNFT
+      expect(await mockERC721.balanceOf(staker.address)).to.eq(0);
+      expect(await stakingContract.balanceOf(staker.address)).to.eq(1);
+    });
+
+    it("User can claim rewards on a staked token", async () => {
+      const blocks = 10;
+      await mine(blocks);
+
+      expect(await stakingContract.stakedOrClaimedAt(tokenId)).to.not.eq(0);
+
+      const balanceBefore = await mockERC20.balanceOf(staker.address);
+
+      await stakingContract.connect(staker).claim(defaultStakingId, tokenId);
+
+      const rewardsPerBlock = (await stakingContract.configs(defaultStakingId)).rewardsPerBlock;
+
+      const balanceAfter = await mockERC20.balanceOf(staker.address);
+
+      // We do blocks + 1 because the claim call is executed on a new block in testing
+      expect(balanceAfter).to.eq(balanceBefore.add(rewardsPerBlock.mul(blocks + 1)));
+      expect(await stakingContract.stakedOrClaimedAt(tokenId)).to.eq(await hre.ethers.provider.getBlockNumber());
+    });
+
+    it("User can unstake a token", async () => {
+      const blocks = 10;
+      await mine(blocks);
+
+      const balanceBefore = await mockERC20.balanceOf(staker.address);
+
+      await stakingContract.connect(staker).unstake(defaultStakingId, tokenId);
+
+      const rewardsPerBlock = (await stakingContract.configs(defaultStakingId)).rewardsPerBlock;
+
+      const balanceAfter = await mockERC20.balanceOf(staker.address);
+
+      expect(balanceAfter).to.eq(balanceBefore.add(rewardsPerBlock.mul(blocks + 1)));
+      expect(await stakingContract.stakedOrClaimedAt(tokenId)).to.eq(0);
+    });
+
+    // fails when user tries to stake an already staked token
+    // fails when user tries to claim an unstaked token
+    // fails when user tries to unstake an unstaked token
+    // fails to stake when a config isn't already set up
+    // fails to claim when a config isn't already set up
+    // fails to unstake when a config isn't already set up
+
+    // fails to stake when an NFT is not owned by the user
+    // fails to claim when a SNFT is not owned by the user
+    // fails to unstake when a SNFT is not owned by the user
+
+    // appropriate fails for when not admin (cannot setConfig or update existing configs)
+    // 
   });
 });

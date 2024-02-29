@@ -7,7 +7,8 @@ import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-// TODO idea, maybe receival of SNFT is what triggers unstake
+// TODO idea, maybe receival of SNFT is what triggers unstake?
+// ERC721Wrapper makes the underlying token to be immutable, but we want to be able to change it
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 contract Staking is ERC721 {
@@ -90,20 +91,18 @@ contract Staking is ERC721 {
     // emit
   }
 
+  // temp
   function lengthOfStake(uint256 tokenId) public view returns(uint256) {
     return block.number - stakedOrClaimedAt[tokenId];
   }
 
   // unstake
   function unstake(uint256 tokenId) public onlySNFTOwner(tokenId) {
-    // require staking block to not equal 0?
-    // if it is zero, the rewards calc below is messed up, but if this 
-    // function is `onlySNFTOwner` then it cant be called when that is the case anyways
 
     config.stakingToken.transferFrom(address(this), originalStakers[tokenId], tokenId);   
     
     // Burn the representative token to symbolize the ending of the stake
-    _burn(tokenId); // can this be done if you don't have the token at hand?
+    _burn(tokenId);
 
     // Transfer funds
     config.rewardsToken.transfer(msg.sender, config.rewardsPerBlock * (block.number - stakedOrClaimedAt[tokenId]));
