@@ -213,7 +213,7 @@ contract StakingMultiple is ERC721Upgradeable {
     // emit Claimed(msg.sender, tokenId, stakingId, rewards);
   }
 
-  function deleteConfig(StakeConfig _config) public onlyAdmin {
+  function deleteConfig(StakeConfig memory _config) public onlyAdmin {
     bytes32 stakingId = getStakingId(_config);
     delete configs[stakingId];
   }

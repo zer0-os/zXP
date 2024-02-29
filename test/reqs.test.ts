@@ -434,6 +434,21 @@ describe("Requirements testing", () => {
       expect(await stakingContract.stakedOrClaimedAt(tokenId)).to.eq(0);
     });
 
+    it("Fails when you try to stake for a pool thats not setup by the admin yet", async () => {
+      const config = {
+        stakingToken : mockERC721.address,
+        rewardsToken : mockERC20.address,
+        rewardsPerBlock : hre.ethers.utils.parseEther("1").toString(),
+        // Difference in rewardsPerBlock will create new stakingId
+      }
+
+      const stakingId = await stakingContract.getStakingId(config);
+
+      await expect(
+          stakingContract.connect(staker).stake(stakingId, tokenId))
+          .to.be.revertedWith("NFT Contract not configured for staking");
+    });
+
     // fails when user tries to stake an already staked token
     // fails when user tries to claim an unstaked token
     // fails when user tries to unstake an unstaked token
@@ -444,6 +459,8 @@ describe("Requirements testing", () => {
     // fails to stake when an NFT is not owned by the user
     // fails to claim when a SNFT is not owned by the user
     // fails to unstake when a SNFT is not owned by the user
+
+    // fails to stake when not setup by admin
 
     // appropriate fails for when not admin (cannot setConfig or update existing configs)
     // 
