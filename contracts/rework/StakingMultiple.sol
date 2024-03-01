@@ -39,7 +39,7 @@ contract StakingMultiple is ERC721Upgradeable {
   modifier onlyNFTOwner(bytes32 stakingId, uint256 tokenId) {
     require(
       configs[stakingId].stakingToken.ownerOf(tokenId) == msg.sender,
-      "Caller is not the original staker"
+      "Caller is not the owner of the NFT to stake"
     );
     _;
   }
@@ -147,10 +147,12 @@ contract StakingMultiple is ERC721Upgradeable {
     bytes32 stakingId,
     uint256 tokenId
   ) public onlyConfigured(stakingId) onlyNFTOwner(stakingId, tokenId) {
-    require(
-      stakedOrClaimedAt[tokenId] == 0,
-      "Token is already staked"
-    );
+    
+    // TODO may not need this afterall, the NFT owner guard above should be enough
+    // require(
+    //   stakedOrClaimedAt[tokenId] == 0,
+    //   "Token is already staked"
+    // );
     
     // Mark the staking block number
     stakedOrClaimedAt[tokenId] = block.number;
@@ -171,10 +173,11 @@ contract StakingMultiple is ERC721Upgradeable {
     bytes32 stakingId,
     uint256 tokenId
   ) public onlySNFTOwner(tokenId) {
-    require(
-      stakedOrClaimedAt[tokenId] != 0,
-      "Token is not currently staked"
-    );
+    // onlySNFTOwner modififer should cover this
+    // require(
+    //   stakedOrClaimedAt[tokenId] != 0,
+    //   "Token is not currently staked"
+    // );
 
     // Return NFT to the original staker
     configs[stakingId].stakingToken.transferFrom(address(this), originalStakers[tokenId], tokenId);
